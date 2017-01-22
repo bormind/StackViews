@@ -12,31 +12,37 @@ let containerViewFrame = CGRect(x: 0, y : 0, width: 400, height: 700)
 let containerView = ContainerView(frame: containerViewFrame)
 
 
-//PlaygroundPage.current.needsIndefiniteExecution = true
+PlaygroundPage.current.needsIndefiniteExecution = true
 
 PlaygroundPage.current.liveView = containerView
 
+func renderSample(_ title: String, viewGenerator: ()->UIView) {
+    containerView.renderSample(sampleView: viewGenerator(), title: title)
 
-func createSample1(color: Int) -> UIView {
+}
+
+renderSample("Sample One") {
     let stackView = UIView()
     
-    stackView.backgroundColor = UIColor(hex: color)
+    stackView.backgroundColor = UIColor(hex: 0xD5F5E3)
     
-//    let children = ["View1", "View2", "View3"].map { createLabel(text: $0) }
-//    
-//    stackViews(
-//        orientation: .horizontal,
-//        inView: stackView,
-//        children: children)
+    let children = ["View1", "View2", "View3"].map { createLabel(text: $0) }
+
+    let constrains = stackViews(
+        orientation: .horizontal,
+        parentView:   stackView,
+        insets: UIEdgeInsets(top: 3, left: 3, bottom: 3, right: 3),
+        spacing: 20,
+        views: children)
+    
+    NSLayoutConstraint.activate(constrains)
     
     return stackView
 }
 
-containerView.renderSample(sampleView: createSample1(color: 0xD5F5E3), title: "Sample 1:")
 
 
 
-containerView.renderSample(sampleView: createSample1(color: 0xAA00DD), title: "Sample 2:")
 
 
 
