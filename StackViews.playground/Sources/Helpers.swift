@@ -36,20 +36,6 @@ extension UIColor {
 
 
 
-public func createLabel(text: String,
-                        textColor: UIColor = UIColor.white,
-                        backgroundColor: UIColor = UIColor.darkGray,
-                        position: CGPoint = CGPoint(x:0, y: 0),
-                        size: CGSize = CGSize(width: 0, height: 0)) -> UILabel {
-    
-    let label = UILabel(frame: CGRect(position: position, size: size))
-    
-    label.text = text
-    label.textColor = textColor
-    label.backgroundColor = backgroundColor
-    
-    return label
-}
 
 
 
