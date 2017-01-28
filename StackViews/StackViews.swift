@@ -22,17 +22,29 @@ public enum Orientation {
 }
 
 public enum Alignment {
-    case start(CGFloat)
-    case center(CGFloat)
-    case end(CGFloat)
-    case stretch
+    case fill
+    case startOffset(CGFloat) // positive value is down ot right
+    case centerOffset(CGFloat) // positive value is down ot right
+    case endOffset(CGFloat) //positive value is up or left
+
+    public static var start: Alignment {
+        return startOffset(0)
+    }
+    
+    public static var center: Alignment {
+        return .centerOffset(0)
+    }
+
+    public static var end: Alignment {
+        return endOffset(0)
+    }
 }
 
 public enum Justify {
     case stretch
     case start
     case end
-    case distribute
+//    case distribute
 }
 
 fileprivate func constraint<AnchorType>(_ lhs: NSLayoutAnchor<AnchorType>, to: NSLayoutAnchor<AnchorType>, _ const: CGFloat) -> NSLayoutConstraint {
@@ -74,24 +86,24 @@ public func setTrailingConstraint(_ orientation: Orientation, _ view: UIView, _ 
 
 fileprivate func setAlignment(_ alignmentOrientation: Orientation, _ view: UIView, _ superview: UIView, _ alignment: Alignment, _ insets: UIEdgeInsets) -> [NSLayoutConstraint] {
     switch (alignmentOrientation, alignment) {
-    case (.horizontal, .start(let val)):
+    case (.horizontal, .startOffset(let val)):
         return [constraint(view.leftAnchor, to: superview.leftAnchor, val + insets.left)]
-    case (.horizontal, .center(let val)):
+    case (.horizontal, .centerOffset(let val)):
         return [constraint(view.centerXAnchor, to: superview.centerXAnchor, val)]
-    case (.horizontal, .end(let val)):
+    case (.horizontal, .endOffset(let val)):
         return [constraint(view.rightAnchor, to: superview.rightAnchor, -(val + insets.right))]
-    case (.horizontal, .stretch):
+    case (.horizontal, .fill):
         return [
             constraint(view.leftAnchor, to: superview.leftAnchor, insets.left),
             constraint(view.rightAnchor, to: superview.rightAnchor, -insets.right)
         ]
-    case (.vertical, .start(let val)):
+    case (.vertical, .startOffset(let val)):
         return [constraint(view.topAnchor, to: superview.topAnchor, val + insets.top)]
-    case (.vertical, .center(let val)):
+    case (.vertical, .centerOffset(let val)):
         return [constraint(view.centerYAnchor , to: superview.centerYAnchor, val)]
-    case (.vertical, .end(let val)):
+    case (.vertical, .endOffset(let val)):
         return [constraint(view.bottomAnchor, to: superview.bottomAnchor, -(val + insets.bottom))]
-    case (.vertical, .stretch):
+    case (.vertical, .fill):
         return [
                 constraint(view.topAnchor, to: superview.topAnchor, insets.top),
                 constraint(view.bottomAnchor, to: superview.bottomAnchor, -insets.bottom)
@@ -109,12 +121,12 @@ fileprivate func alignmentToUse(_ orientation: Orientation, _ viewAlignment: Ali
     }
 
     if let _ = crossDimension {
-        return .center(0)
+        return .centerOffset(0)
     }
 
     //Usually controls like Labels and buttons have intrinsic height let center them vertically
     // For vertical staking lets stretch controls horizontally
-    return orientation == .horizontal ? Alignment.center(0) : Alignment.stretch
+    return orientation == .horizontal ? Alignment.centerOffset(0) : Alignment.fill
 }
 
 fileprivate func setSpace(_ orientation: Orientation, _ v1: UIView, _ v2: UIView, _ value: CGFloat) -> NSLayoutConstraint {
@@ -164,33 +176,57 @@ public func spaceViews(
     }
 }
 
-public func setWidths(views: [UIView], widths: [CGFloat?]) -> [NSLayoutConstraint] {
+public func setWidths(views: [UIView], widths: [CGFloat?], priority: UILayoutPriority? = nil) -> [NSLayoutConstraint] {
 
     assert(widths.count == views.count, propertyCountMismatchMessage)
 
-    return widths
-            .enumerated()
-            .filter { $0.1 != nil }
-            .map { views[$0.0].widthAnchor.constraint(equalToConstant: $0.1!) }
+    let constraints =  widths
+                            .enumerated()
+                            .filter { $0.1 != nil }
+                            .map { views[$0.0].widthAnchor.constraint(equalToConstant: $0.1!) }
+
+    if let priority = priority {
+        constraints.forEach { $0.priority = priority }
+    }
+
+    return constraints
 }
 
-public func setHeights(views: [UIView], heights: [CGFloat?]) -> [NSLayoutConstraint] {
+public func setHeights(views: [UIView], heights: [CGFloat?], priority: UILayoutPriority? = nil) -> [NSLayoutConstraint] {
 
     assert(heights.count == views.count, propertyCountMismatchMessage)
 
-    return heights
-            .enumerated()
-            .filter { $0.1 != nil }
-            .map { views[$0.0].heightAnchor.constraint(equalToConstant: $0.1!) }
+    let constraints =   heights
+                            .enumerated()
+                            .filter { $0.1 != nil }
+                            .map { views[$0.0].heightAnchor.constraint(equalToConstant: $0.1!) }
+
+    if let priority = priority {
+        constraints.forEach { $0.priority = priority }
+    }
+
+    return constraints
 }
 
-//This is very naive implementation - we just set spacing to the same value and set very low priority to the constrains
-fileprivate func distributeViews(orientation: Orientation, views: [UIView]) -> [NSLayoutConstraint] {
-    
-    let constraints = spaceViews(orientation: orientation, views: views, spacing: 10)
+public func setSameWidth(views:[UIView], priority: UILayoutPriority? = nil) -> [NSLayoutConstraint] {
+    let constraints = (1..<views.count).map {
+        return views[$0].widthAnchor.constraint(equalTo: views[0].widthAnchor)
+    }
 
-    for c in constraints {
-        c.priority = 10
+    if let priority = priority {
+        constraints.forEach { $0.priority = priority }
+    }
+
+    return constraints
+}
+
+public func setSameHeight(views:[UIView], priority: UILayoutPriority? = nil) -> [NSLayoutConstraint] {
+    let constraints = (1..<views.count).map {
+        return views[$0].heightAnchor.constraint(equalTo: views[0].heightAnchor)
+    }
+
+    if let priority = priority {
+        constraints.forEach { $0.priority = priority }
     }
 
     return constraints
@@ -215,13 +251,7 @@ public func justifyViews(
         constrains.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
     }
 
-    if justify == .distribute {
-        constrains += distributeViews(orientation: orientation, views: views)
-    }
-    else {
-        constrains += spaceViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
-        
-    }
+    constrains += spaceViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
 
     return constrains
 }
@@ -274,8 +304,8 @@ public func stackViews(
     let defaultAlignment: Alignment?
     if alignment == nil && individualAlignments == nil {
         switch orientation {
-        case .horizontal: defaultAlignment = .center(0)
-        case .vertical: defaultAlignment = widths == nil ? .stretch : .center(0)
+        case .horizontal: defaultAlignment = .centerOffset(0)
+        case .vertical: defaultAlignment = widths == nil ? .fill : .centerOffset(0)
         }
     }
     else {

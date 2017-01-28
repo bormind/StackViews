@@ -10,9 +10,10 @@ let containerViewFrame = CGRect(x: 0, y : 0, width: 400, height: 700)
 
 
 let containerView = ContainerView(frame: containerViewFrame)
+containerView.backgroundColor = UIColor.orange
 
 
-PlaygroundPage.current.needsIndefiniteExecution = true
+//PlaygroundPage.current.needsIndefiniteExecution = true
 
 PlaygroundPage.current.liveView = containerView
 
@@ -110,12 +111,13 @@ renderSample("Horizontal stretch, spacing and individual alignments:") {
         parentView:   stackView,
         insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
         justify: .stretch,
-        alignment: .center(0),
+        alignment: .centerOffset(0),
         spacing: 20,
         views: children,
         widths: [70, nil, 70],
         heights: [40, 40, 40],
-        individualAlignments:[.stretch, nil, .end(0)])
+        individualAlignments:[.fill, nil, .end])
+    
     
     NSLayoutConstraint.activate(constrains)
     
