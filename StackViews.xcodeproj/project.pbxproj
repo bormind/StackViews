@@ -11,7 +11,18 @@
 		97BC712B1E2D50C600D1E56B /* StackViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97BC712A1E2D50C600D1E56B /* StackViews.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		97B750091E3D2E0100AC746B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97B750051E3D2E0000AC746B /* StackViewsExamples.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 97B74FF01E3D2E0000AC746B;
+			remoteInfo = StackViewsExamples;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		97B750051E3D2E0000AC746B /* StackViewsExamples.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = StackViewsExamples.xcodeproj; path = StackViewsExamples/StackViewsExamples.xcodeproj; sourceTree = "<group>"; };
 		97BC71101E2D502A00D1E56B /* StackViews.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = StackViews.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		97BC71131E2D502A00D1E56B /* StackViews.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackViews.h; sourceTree = "<group>"; };
 		97BC71141E2D502A00D1E56B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -30,9 +41,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		97B750061E3D2E0000AC746B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				97B7500A1E3D2E0100AC746B /* StackViewsExamples.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		97BC71061E2D502A00D1E56B = {
 			isa = PBXGroup;
 			children = (
+				97B750051E3D2E0000AC746B /* StackViewsExamples.xcodeproj */,
 				97BC712C1E2D511F00D1E56B /* StackViews.playground */,
 				97BC71121E2D502A00D1E56B /* StackViews */,
 				97BC71111E2D502A00D1E56B /* Products */,
@@ -116,12 +136,28 @@
 			mainGroup = 97BC71061E2D502A00D1E56B;
 			productRefGroup = 97BC71111E2D502A00D1E56B /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 97B750061E3D2E0000AC746B /* Products */;
+					ProjectRef = 97B750051E3D2E0000AC746B /* StackViewsExamples.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				97BC710F1E2D502A00D1E56B /* StackViews */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		97B7500A1E3D2E0100AC746B /* StackViewsExamples.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = StackViewsExamples.app;
+			remoteRef = 97B750091E3D2E0100AC746B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		97BC710E1E2D502A00D1E56B /* Resources */ = {
@@ -302,6 +338,7 @@
 				97BC71261E2D502A00D1E56B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

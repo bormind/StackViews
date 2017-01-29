@@ -268,7 +268,8 @@ public func stackViews(
         widths: [CGFloat?]? = nil,
         heights: [CGFloat?]? = nil,
         individualAlignments: [Alignment?]? = nil,
-        individualSpacings: [CGFloat?]? = nil) -> [NSLayoutConstraint] {
+        individualSpacings: [CGFloat?]? = nil,
+        activateConstrains: Bool = true) -> [NSLayoutConstraint] {
     
     if views.count == 0 {
         return []
@@ -319,6 +320,10 @@ public func stackViews(
             alignment: defaultAlignment,
             views: views,
             individualAlignments: individualAlignments)
+
+    if activateConstrains {
+        NSLayoutConstraint.activate(constraints)
+    }
 
     return constraints
 }
