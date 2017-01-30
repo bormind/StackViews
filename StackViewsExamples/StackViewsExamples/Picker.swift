@@ -30,21 +30,26 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
         super.init(nibName: nil, bundle: nil)
 
-        self.touchOutsideRecognizer = UITapGestureRecognizer(target: self, action: #selector(onTouch))
+        picker.dataSource = self
+        picker.delegate = self
+
+        self.touchOutsideRecognizer = UITapGestureRecognizer(target: self, action: #selector(onTouchOutsidePicker))
         self.view.addGestureRecognizer(self.touchOutsideRecognizer)
 
         self.picker.showsSelectionIndicator = true
+        self.picker.backgroundColor = UIColor.white
+        self.picker.selectRow(self.selectedIndex, inComponent: 0, animated: false)
 
-        view.backgroundColor = UIColor.clear
-        view.isOpaque = false
+        self.view.backgroundColor = UIColor.gray.withAlphaComponent(0.6)
+        self.modalPresentationStyle = .overCurrentContext
 
         stackViews(
                 orientation: .horizontal,
                 parentView: self.view,
                 insets: UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20),
                 justify: .stretch,
-                alignment: .fill,
-                views: [picker])
+                views: [picker],
+                heights: [200])
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -65,6 +70,21 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         onCompletedSelection(isCanceled: false)
     }
 
+
+    func pickerView(_ pickerView: UIPickerView,
+                             viewForRow row: Int,
+                             forComponent component: Int,
+                             reusing view: UIView?) -> UIView {
+
+        let label = (view as? UILabel) ?? UILabel()
+        label.textAlignment = .center
+
+        label.text = self.titles[row]
+
+        return label
+
+    }
+
     private func onCompletedSelection(isCanceled: Bool) {
 
         self.view.removeGestureRecognizer(self.touchOutsideRecognizer)
@@ -74,8 +94,8 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         }
     }
 
-    func onTouch() {
-        print("Touched !!!!")
+    func onTouchOutsidePicker() {
+        onCompletedSelection(isCanceled: true)
     }
 
 }

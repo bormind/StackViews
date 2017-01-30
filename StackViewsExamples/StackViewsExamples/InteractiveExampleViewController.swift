@@ -101,7 +101,7 @@ class InteractiveExampleViewController: UIViewController {
     func onOrientation() {
         let items: [Orientation] = [.horizontal, .vertical]
         let currentIndex = items.index(where: { $0 == self.options.orientation })
-        let titles = items.map { String(describing: $0) }
+        let titles = items.map { ".\($0)" }
         pickOne(container: self, titles: titles, selectedIndex: currentIndex) { selectedIndex in
             if let selectedIndex = selectedIndex,
                selectedIndex != currentIndex {
