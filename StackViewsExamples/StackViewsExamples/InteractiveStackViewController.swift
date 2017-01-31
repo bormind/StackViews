@@ -38,7 +38,7 @@ fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options
     stackViews(
             orientation: options.orientation,
             parentView: parentView,
-            insets: UIEdgeInsets.zero,
+            insets: options.insets,
             justify: options.justify,
             views: children,
             widths: [50, 50, nil],

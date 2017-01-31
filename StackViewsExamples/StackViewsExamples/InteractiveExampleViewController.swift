@@ -8,12 +8,6 @@ import UIKit
 
 import StackViews
 
-struct StackOptions {
-    var orientation: Orientation
-    var justify: Justify
-}
-
-
 
 class InteractiveExampleViewController: UIViewController {
 

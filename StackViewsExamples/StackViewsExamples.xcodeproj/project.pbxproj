@@ -13,6 +13,7 @@
 		97B74FFE1E3D2E0000AC746B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97B74FFC1E3D2E0000AC746B /* LaunchScreen.storyboard */; };
 		97B7500D1E3D8A6B00AC746B /* StackViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97B7500C1E3D8A6B00AC746B /* StackViews.framework */; };
 		AD8C867116CFFFD6DFFE3608 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C84637050A3C6833EA307 /* MenuViewController.swift */; };
+		AD8C8681E72B8D972958CE85 /* UIEdgeInsetsExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C8AEF50F0B01418A0336E /* UIEdgeInsetsExtensions.swift */; };
 		AD8C86A5C4DF70D49D03C6E0 /* Picker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C85876535C45CF71C5669 /* Picker.swift */; };
 		AD8C8CDA3B51A3F46E69CA66 /* MenuTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C870B6567607F5932736D /* MenuTableCell.swift */; };
 		AD8C8D92376AF41CEBD9909D /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C83350494715545A563D0 /* UIColorExtensions.swift */; };
@@ -36,6 +37,7 @@
 		AD8C85C0FD2B4F5831D2C29C /* OptionsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionsViewController.swift; sourceTree = "<group>"; };
 		AD8C870B6567607F5932736D /* MenuTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuTableCell.swift; sourceTree = "<group>"; };
 		AD8C87DD0301138375065FF3 /* InteractiveStackViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveStackViewController.swift; sourceTree = "<group>"; };
+		AD8C8AEF50F0B01418A0336E /* UIEdgeInsetsExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIEdgeInsetsExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				AD8C83350494715545A563D0 /* UIColorExtensions.swift */,
+				AD8C8AEF50F0B01418A0336E /* UIEdgeInsetsExtensions.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -198,6 +201,7 @@
 				AD8C8F9707A26B01DBDA1E66 /* InteractiveStackViewController.swift in Sources */,
 				AD8C8D92376AF41CEBD9909D /* UIColorExtensions.swift in Sources */,
 				AD8C8E3337352CFB13FC676B /* OptionsViewController.swift in Sources */,
+				AD8C8681E72B8D972958CE85 /* UIEdgeInsetsExtensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
