@@ -9,7 +9,8 @@ import StackViews
 
 func pickOne(container: UIViewController, titles: [String], selectedIndex: Int? = nil, completion:  @escaping (Int?) -> ()) {
     let vc = PickerViewController(items: titles, selectedIndex: selectedIndex, completion: completion)
-    container.present(vc, animated: true, completion: nil)
+
+    container.view.window?.rootViewController?.present(vc, animated: true, completion: nil)
 }
 
 class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
@@ -41,7 +42,8 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         self.picker.selectRow(self.selectedIndex, inComponent: 0, animated: false)
 
         self.view.backgroundColor = UIColor.gray.withAlphaComponent(0.6)
-        self.modalPresentationStyle = .overCurrentContext
+//        self.modalPresentationStyle = .overCurrentContext
+        self.modalPresentationStyle = .overFullScreen
 
         stackViews(
                 orientation: .horizontal,
