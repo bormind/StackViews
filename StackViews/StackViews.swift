@@ -23,21 +23,9 @@ public enum Orientation {
 
 public enum Alignment {
     case fill
-    case startOffset(CGFloat) // positive value is down ot right
-    case centerOffset(CGFloat) // positive value is down ot right
-    case endOffset(CGFloat) //positive value is up or left
-
-    public static var start: Alignment {
-        return startOffset(0)
-    }
-    
-    public static var center: Alignment {
-        return .centerOffset(0)
-    }
-
-    public static var end: Alignment {
-        return endOffset(0)
-    }
+    case start
+    case center
+    case end
 }
 
 public enum Justify {
@@ -86,23 +74,23 @@ public func setTrailingConstraint(_ orientation: Orientation, _ view: UIView, _ 
 
 fileprivate func setAlignment(_ alignmentOrientation: Orientation, _ view: UIView, _ superview: UIView, _ alignment: Alignment, _ insets: UIEdgeInsets) -> [NSLayoutConstraint] {
     switch (alignmentOrientation, alignment) {
-    case (.horizontal, .startOffset(let val)):
-        return [constraint(view.leftAnchor, to: superview.leftAnchor, val + insets.left)]
-    case (.horizontal, .centerOffset(let val)):
-        return [constraint(view.centerXAnchor, to: superview.centerXAnchor, val)]
-    case (.horizontal, .endOffset(let val)):
-        return [constraint(view.rightAnchor, to: superview.rightAnchor, -(val + insets.right))]
+    case (.horizontal, .start):
+        return [constraint(view.leftAnchor, to: superview.leftAnchor, insets.left)]
+    case (.horizontal, .center):
+        return [constraint(view.centerXAnchor, to: superview.centerXAnchor, 0)]
+    case (.horizontal, .end):
+        return [constraint(view.rightAnchor, to: superview.rightAnchor, -insets.right)]
     case (.horizontal, .fill):
         return [
             constraint(view.leftAnchor, to: superview.leftAnchor, insets.left),
             constraint(view.rightAnchor, to: superview.rightAnchor, -insets.right)
         ]
-    case (.vertical, .startOffset(let val)):
-        return [constraint(view.topAnchor, to: superview.topAnchor, val + insets.top)]
-    case (.vertical, .centerOffset(let val)):
-        return [constraint(view.centerYAnchor , to: superview.centerYAnchor, val)]
-    case (.vertical, .endOffset(let val)):
-        return [constraint(view.bottomAnchor, to: superview.bottomAnchor, -(val + insets.bottom))]
+    case (.vertical, .start):
+        return [constraint(view.topAnchor, to: superview.topAnchor, insets.top)]
+    case (.vertical, .center):
+        return [constraint(view.centerYAnchor , to: superview.centerYAnchor, 0)]
+    case (.vertical, .end):
+        return [constraint(view.bottomAnchor, to: superview.bottomAnchor, -insets.bottom)]
     case (.vertical, .fill):
         return [
                 constraint(view.topAnchor, to: superview.topAnchor, insets.top),
@@ -121,12 +109,12 @@ fileprivate func alignmentToUse(_ orientation: Orientation, _ viewAlignment: Ali
     }
 
     if let _ = crossDimension {
-        return .centerOffset(0)
+        return .center
     }
 
     //Usually controls like Labels and buttons have intrinsic height let center them vertically
     // For vertical staking lets stretch controls horizontally
-    return orientation == .horizontal ? Alignment.centerOffset(0) : Alignment.fill
+    return orientation == .horizontal ? Alignment.center : Alignment.fill
 }
 
 fileprivate func setSpace(_ orientation: Orientation, _ v1: UIView, _ v2: UIView, _ value: CGFloat) -> NSLayoutConstraint {
@@ -260,9 +248,9 @@ public func justifyViews(
 public func stackViews(
         orientation: Orientation,
         parentView: UIView,
-        insets: UIEdgeInsets = UIEdgeInsets.zero,
-        justify: Justify = .start,
+        justify: Justify? = nil,
         alignment: Alignment? = nil,
+        insets: UIEdgeInsets = UIEdgeInsets.zero,
         spacing: CGFloat? = nil,
         views: [UIView],
         widths: [CGFloat?]? = nil,
@@ -297,7 +285,7 @@ public func stackViews(
                         orientation: orientation,
                         parentView: parentView,
                         insets: insets,
-                        justify: justify,
+                        justify: justify ?? .start,
                         spacing: spacing,
                         views: views,
                         individualSpacings: individualSpacings)
@@ -305,8 +293,8 @@ public func stackViews(
     let defaultAlignment: Alignment?
     if alignment == nil && individualAlignments == nil {
         switch orientation {
-        case .horizontal: defaultAlignment = .centerOffset(0)
-        case .vertical: defaultAlignment = widths == nil ? .fill : .centerOffset(0)
+        case .horizontal: defaultAlignment = .center
+        case .vertical: defaultAlignment = widths == nil ? .fill : .center
         }
     }
     else {
