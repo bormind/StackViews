@@ -7,7 +7,7 @@ import Foundation
 import UIKit
 import StackViews
 
-func startPicker(container: UIViewController, title: String, items: [[String]], selectedIndexes: [Int], completion:  @escaping (Bool, [Int]) -> ()) {
+func startPicker(container: UIViewController, title: String, items: [[String]], selectedIndexes: [Int], completion:  @escaping ([Int]) -> ()) {
     let vc = PickerViewController(title: title, items: items, selectedIndexes: selectedIndexes, completion: completion)
 
     container.view.window?.rootViewController?.present(vc, animated: true, completion: nil)
@@ -15,7 +15,7 @@ func startPicker(container: UIViewController, title: String, items: [[String]], 
 
 class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
 
-    let cancelButton = UIButton()
+    let leftSpacer = UIView()
     let doneButton = UIButton()
     let titleLabel = UILabel()
 
@@ -25,15 +25,18 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
     var indexes: [Int]
 
-    let completion: (Bool, [Int]) -> ()
+    let completion: ([Int]) -> ()
 
     var touchOutsideRecognizer: UITapGestureRecognizer!
 
-    init(title: String, items: [[String]], selectedIndexes: [Int], completion: @escaping (Bool, [Int]) -> ()) {
+    let initialSelection: [Int]
+
+    init(title: String, items: [[String]], selectedIndexes: [Int], completion: @escaping ([Int]) -> ()) {
 
         assert(items.count == selectedIndexes.count)
 
         self.items = items
+        self.initialSelection = selectedIndexes
         self.indexes = selectedIndexes
         self.completion = completion
 
@@ -43,8 +46,12 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         picker.delegate = self
 
         titleLabel.textAlignment = .center
-        cancelButton.addTarget(self, action: #selector(onCancel), for: .touchUpInside)
+        titleLabel.text = title
+
         doneButton.addTarget(self, action: #selector(onDone), for: .touchUpInside)
+        doneButton.setTitle("X", for: .normal)
+        doneButton.setTitleColor(UIColor.blue, for: .normal)
+        doneButton.backgroundColor = UIColor.lightGray
 
         self.touchOutsideRecognizer = UITapGestureRecognizer(target: self, action: #selector(onTouchOutsidePicker))
         self.view.addGestureRecognizer(self.touchOutsideRecognizer)
@@ -58,23 +65,42 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 //        self.modalPresentationStyle = .overCurrentContext
         self.modalPresentationStyle = .overFullScreen
 
+        let panelView = createPanelView(container: self.view)
+
         //Title bar
         let _ = stackViews(orientation: .horizontal,
-                    parentView: self.view,
+                    parentView: panelView,
                     justify: .stretch,
                     alignment: .start,
                     insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
-                    views: [cancelButton, titleLabel, doneButton],
+                    views: [leftSpacer, titleLabel, doneButton],
                     widths: [50, nil, 50],
                     heights: [25, 25, 25])
 
+        //picker
         let _ = stackViews(
                     orientation: .horizontal,
-                    parentView: self.view,
+                    parentView: panelView,
                     justify: .stretch,
-                    insets: UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20),
-                    views: [picker],
-                    heights: [200])
+                    alignment: .fill,
+                    insets: UIEdgeInsets(top: 40, left: 0, bottom: 0, right: 0),
+                    views: [picker])
+    }
+
+    private func createPanelView(container: UIView) -> UIView {
+        let panel = UIView()
+        panel.backgroundColor = UIColor.orange
+
+        let _ = stackViews(
+                    orientation: .horizontal,
+                    parentView: container,
+                    justify: .stretch,
+                    alignment: .center,
+                    insets: UIEdgeInsets(horizontal: 20),
+                    views: [panel],
+                    heights: [250])
+
+        return panel
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -108,25 +134,22 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
     }
 
-    private func onSelectionCompleted(success: Bool) {
+    private func onSelectionCompleted() {
 
         self.view.removeGestureRecognizer(self.touchOutsideRecognizer)
 
         self.dismiss(animated: true) {
-            self.completion(success, self.indexes)
+            self.completion(self.indexes)
         }
     }
 
     func onTouchOutsidePicker() {
-        onCancel()
+        onSelectionCompleted()
     }
 
     func onDone() {
-        onSelectionCompleted(success: true)
+        onSelectionCompleted()
     }
 
-    func onCancel() {
-        onSelectionCompleted(success: false)
-    }
 
 }
