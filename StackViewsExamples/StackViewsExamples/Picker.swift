@@ -7,8 +7,8 @@ import Foundation
 import UIKit
 import StackViews
 
-func startPicker(container: UIViewController, title: String, items: [[String]], selectedIndexes: [Int], completion:  @escaping ([Int]) -> ()) {
-    let vc = PickerViewController(title: title, items: items, selectedIndexes: selectedIndexes, completion: completion)
+func startPicker(container: UIViewController, title: String, items: [[String]], selectedIndexes: [Int], componentTitles: [String]? = nil, completion:  @escaping ([Int]) -> ()) {
+    let vc = PickerViewController(title: title, items: items, selectedIndexes: selectedIndexes, componentTitles: componentTitles, completion: completion)
 
     container.view.window?.rootViewController?.present(vc, animated: true, completion: nil)
 }
@@ -31,9 +31,10 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
     let initialSelection: [Int]
 
-    init(title: String, items: [[String]], selectedIndexes: [Int], completion: @escaping ([Int]) -> ()) {
+    init(title: String, items: [[String]], selectedIndexes: [Int], componentTitles: [String]? = nil, completion: @escaping ([Int]) -> ()) {
 
         assert(items.count == selectedIndexes.count)
+        assert(componentTitles == nil || items.count == componentTitles!.count)
 
         self.items = items
         self.initialSelection = selectedIndexes
@@ -57,7 +58,10 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         self.view.addGestureRecognizer(self.touchOutsideRecognizer)
 
         self.picker.showsSelectionIndicator = true
-        self.picker.backgroundColor = UIColor.white
+
+        if let componentTitles = componentTitles {
+            renderComponentTitles(componentTitles, picker: self.picker)
+        }
 
         (0..<selectedIndexes.count).forEach { self.picker.selectRow(selectedIndexes[$0], inComponent: $0, animated: false) }
 
@@ -87,9 +91,26 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
                     views: [picker])
     }
 
+    private func renderComponentTitles(_ titles: [String], picker: UIPickerView)  {
+        let labels: [UIView] = titles.map {
+            let label = UILabel()
+            label.text = $0
+            label.textAlignment = .center
+            label.backgroundColor = UIColor.barColor
+            return label
+        }
+
+        stackViews(
+                orientation: .horizontal,
+                parentView: picker,
+                justify: .stretch,
+                alignment: .start,
+                views: labels)
+    }
+
     private func createPanelView(container: UIView) -> UIView {
         let panel = UIView()
-        panel.backgroundColor = UIColor.orange
+        panel.backgroundColor = UIColor.barColor
 
         let _ = stackViews(
                     orientation: .horizontal,

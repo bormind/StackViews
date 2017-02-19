@@ -18,6 +18,8 @@ extension UIColor {
     convenience public init(hex:Int) {
         self.init(red:(hex >> 16) & 0xff, green:(hex >> 8) & 0xff, blue:hex & 0xff)
     }
+
+    static let barColor = UIColor(red: 247, green: 247, blue: 247)
 }
 
 

@@ -40,7 +40,7 @@ fileprivate func removeConstraint(constraint: NSLayoutConstraint) {
 }
 
 
-fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options: StackOptions) -> [NSLayoutConstraint] {
+fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options: StackOptions) -> StackingResult {
 
     return stackViews(
             orientation: options.orientation,
@@ -76,5 +76,6 @@ class InteractiveStackViewController: UIViewController {
         self.constraints.forEach(removeConstraint)
 
         self.constraints = stackWithOptions(parentView: self.view, children: self.children, options: options)
+                                .constraints
     }
 }

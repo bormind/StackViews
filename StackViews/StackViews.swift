@@ -35,6 +35,27 @@ public enum Justify {
 //    case distribute
 }
 
+public struct StackingResult {
+    public let constraints: [NSLayoutConstraint]
+    public let generatedViews: [UIView]
+    public let errors: [String]
+
+    init(constraints: [NSLayoutConstraint] = [], generatedViews: [UIView] = [], errors: [String] = []) {
+        self.constraints = constraints
+        self.generatedViews = generatedViews
+        self.errors = errors
+    }
+}
+
+extension StackingResult {
+    func merge(_ other: StackingResult) -> StackingResult {
+        return StackingResult(
+                constraints: self.constraints + other.constraints,
+                generatedViews: self.generatedViews + other.generatedViews,
+                errors: self.errors + other.errors)
+    }
+}
+
 fileprivate func constraint<AnchorType>(_ lhs: NSLayoutAnchor<AnchorType>, to: NSLayoutAnchor<AnchorType>, _ const: CGFloat) -> NSLayoutConstraint {
     return lhs.constraint(equalTo: to, constant: const)
 }
@@ -227,6 +248,7 @@ public func justifyViews(
         justify: Justify,
         spacing: CGFloat? = nil,
         views: [UIView],
+        alongDimensions: [CGFloat?]? = nil,
         individualSpacings: [CGFloat?]?) -> [NSLayoutConstraint] {
 
     var constrains: [NSLayoutConstraint] = []
@@ -240,6 +262,25 @@ public func justifyViews(
     }
 
     constrains += spaceViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
+
+    if justify == Justify.stretch {
+        let viewsWithUnsetDimensions: [UIView]
+        if let dimensions = alongDimensions {
+            viewsWithUnsetDimensions = (0..<views.count)
+                    .filter { dimensions[$0] == nil }
+                    .map { views[$0] }
+        }
+        else {
+            viewsWithUnsetDimensions = views
+        }
+
+        switch orientation {
+        case .horizontal:
+            constrains += setSameWidth(views: viewsWithUnsetDimensions, priority: 20)
+        case .vertical:
+            constrains += setSameHeight(views: viewsWithUnsetDimensions, priority: 20)
+        }
+    }
 
     return constrains
 }
@@ -257,10 +298,10 @@ public func stackViews(
         heights: [CGFloat?]? = nil,
         individualAlignments: [Alignment?]? = nil,
         individualSpacings: [CGFloat?]? = nil,
-        activateConstrains: Bool = true) -> [NSLayoutConstraint] {
+        activateConstrains: Bool = true) -> StackingResult {
     
     if views.count == 0 {
-        return []
+        return StackingResult()
     }
 
     views.forEach {
@@ -281,6 +322,18 @@ public func stackViews(
         constraints += setHeights(views: views, heights: heights)
     }
 
+    let alongDimensions: [CGFloat?]?
+    let crossDimensions: [CGFloat?]?
+
+    switch orientation {
+    case .horizontal:
+        alongDimensions = widths
+        crossDimensions = heights
+    case .vertical:
+        alongDimensions = heights
+        crossDimensions = widths
+    }
+
     constraints += justifyViews(
                         orientation: orientation,
                         parentView: parentView,
@@ -288,7 +341,9 @@ public func stackViews(
                         justify: justify ?? .start,
                         spacing: spacing,
                         views: views,
+                        alongDimensions: alongDimensions,
                         individualSpacings: individualSpacings)
+
 
     let defaultAlignment: Alignment?
     if alignment == nil && individualAlignments == nil {
@@ -313,5 +368,5 @@ public func stackViews(
         NSLayoutConstraint.activate(constraints)
     }
 
-    return constraints
+    return StackingResult(constraints: constraints)
 }

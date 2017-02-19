@@ -37,19 +37,10 @@ fileprivate func labeledRow(_ label: String, _ ctrl: UIView) -> UIView {
 }
 
 fileprivate func formatInsets(_ insets: UIEdgeInsets) -> String {
-    let pairs = zip(
-            ["top:", "left:", "bottom:", "right:"],
+    return zip(
+            ["t:", "l:", "b:", "r:"],
             [Int(insets.top), Int(insets.left), Int(insets.bottom), Int(insets.right)] )
-
-    let nonZero = pairs.filter { $0.1 != 0 }
-
-    if nonZero.isEmpty {
-        return "UIEdgeInsets.zero"
-    }
-    else {
-        return nonZero.map { "\($0.0)\($0.1)" }.joined(separator: " ")
-    }
-
+            .map { "\($0.0)\($0.1)" }.joined(separator: " ")
 }
 
 fileprivate func formatButton(_ button: UIButton) {
@@ -191,20 +182,15 @@ class OptionsViewController: UIViewController {
     }
 
     func onInsets() {
-        let items = [
-                UIEdgeInsets.zero,
-                UIEdgeInsets.create(top: 20),
-                UIEdgeInsets.create(left: 20),
-                UIEdgeInsets.create(bottom: 20),
-                UIEdgeInsets.create(right: 20),
-                UIEdgeInsets(horizontal: 20, vertical: 20)
-        ]
+        let componentItems:[CGFloat] = [0, 20]
+        let items = [[CGFloat]](repeating: componentItems, count:4)
+        let stringItems = [[String]](repeating: componentItems.map {"\($0)"}, count:4)
 
-        let currentIndex = items.index(where: { $0 == self.options.insets }) ?? 0
-        let titles = items.map(formatInsets)
+        let currentValues = [self.options.insets.top, self.options.insets.left, self.options.insets.bottom, self.options.insets.right]
+        let currentIndexes = getMultiComponentIndexes(components: items, values: currentValues)
 
-        onPickProperty("Insets", [titles], [currentIndex]) {
-            self.options.insets = items[$0[0]]
+        onPickProperty("Insets", stringItems, currentIndexes, ["top", "left", "bottom", "right"]) {
+            self.options.insets = UIEdgeInsets(top: items[0][$0[0]], left: items[1][$0[1]], bottom: items[2][$0[2]], right: items[3][$0[3]])
         }
     }
 
@@ -259,8 +245,8 @@ class OptionsViewController: UIViewController {
         }
     }
 
-    func onPickProperty(_ title: String, _ items: [[String]], _ initialSelection:[Int], _ setNewSelection: @escaping ([Int]) -> ()) {
-        startPicker(container: self, title: title, items: items, selectedIndexes: initialSelection) { indexes in
+    func onPickProperty(_ title: String, _ items: [[String]], _ initialSelection:[Int], _ componentTitles:[String]? = nil, _ setNewSelection: @escaping ([Int]) -> ()) {
+        startPicker(container: self, title: title, items: items, selectedIndexes: initialSelection, componentTitles: componentTitles) { indexes in
             if initialSelection != indexes {
                 setNewSelection(indexes)
                 self.updateUI()
