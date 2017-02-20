@@ -32,6 +32,8 @@ public enum Justify {
     case stretch
     case start
     case end
+    case spaceBetween
+    case center
 //    case distribute
 }
 
@@ -93,6 +95,31 @@ public func setTrailingConstraint(_ orientation: Orientation, _ view: UIView, _ 
     }
 }
 
+
+//Returns tuple of new array of all the views and spacer views only
+fileprivate func insertSpacerViews(views: [UIView]) -> ([UIView], [UIView]) {
+    if views.count < 2 {
+        return (views, [])
+    }
+
+    let spacerViews = (0..<views.count - 1).map { _ in UIView() }
+
+    let allViews = (0..<spacerViews.count).reduce([views[0]]) { acc, i in
+        return acc + [spacerViews[i], views[i + 1]]
+    }
+
+    return (allViews, spacerViews)
+}
+
+//Returns tuple of new array of all the views and outer views only
+fileprivate func addOuterViews(views: [UIView]) -> ([UIView], [UIView]) {
+    let outerViews = [UIView(), UIView()]
+
+    let allViews = [outerViews[0]] + views + [outerViews[1]]
+
+    return (allViews, outerViews)
+}
+
 fileprivate func setAlignment(_ alignmentOrientation: Orientation, _ view: UIView, _ superview: UIView, _ alignment: Alignment, _ insets: UIEdgeInsets) -> [NSLayoutConstraint] {
     switch (alignmentOrientation, alignment) {
     case (.horizontal, .start):
@@ -145,6 +172,30 @@ fileprivate func setSpace(_ orientation: Orientation, _ v1: UIView, _ v2: UIView
     }
 }
 
+fileprivate func hasIntrinsicWidth(_ view: UIView) -> Bool {
+    return view.intrinsicContentSize.width != UIViewNoIntrinsicMetric
+}
+
+fileprivate func hasIntrinsicHeight(_ view: UIView) -> Bool {
+    return view.intrinsicContentSize.height != UIViewNoIntrinsicMetric
+}
+
+fileprivate func getViewsWithUnsetDimensions(_ orientation: Orientation, _ views: [UIView], _ dimensions: [CGFloat?]?) -> [UIView] {
+    assert(dimensions == nil || views.count == dimensions!.count)
+
+    let hasIntrinsicDimension: (UIView) -> Bool
+    switch orientation {
+    case .horizontal: hasIntrinsicDimension =  hasIntrinsicWidth
+    case .vertical: hasIntrinsicDimension = hasIntrinsicHeight
+    }
+
+    return (0..<views.count)
+                .filter {
+                    return dimensions?[$0] == nil && !hasIntrinsicDimension(views[$0])
+                }
+                .map { views[$0] }
+}
+
 //if both alignment and individualAlignments are provided than alignment will be used as a default if individualAlignments[i] == nil
 public func alignViews(
         alignmentOrientation: Orientation,
@@ -168,7 +219,7 @@ public func alignViews(
 }
 
 
-public func spaceViews(
+public func chainViews(
         orientation: Orientation,
         views: [UIView],
         spacing: CGFloat = 0,
@@ -218,6 +269,10 @@ public func setHeights(views: [UIView], heights: [CGFloat?], priority: UILayoutP
 }
 
 public func setSameWidth(views:[UIView], priority: UILayoutPriority? = nil) -> [NSLayoutConstraint] {
+    if views.count < 2 {
+        return []
+    }
+
     let constraints = (1..<views.count).map {
         return views[$0].widthAnchor.constraint(equalTo: views[0].widthAnchor)
     }
@@ -230,6 +285,10 @@ public func setSameWidth(views:[UIView], priority: UILayoutPriority? = nil) -> [
 }
 
 public func setSameHeight(views:[UIView], priority: UILayoutPriority? = nil) -> [NSLayoutConstraint] {
+    if views.count < 2 {
+        return []
+    }
+
     let constraints = (1..<views.count).map {
         return views[$0].heightAnchor.constraint(equalTo: views[0].heightAnchor)
     }
@@ -240,6 +299,8 @@ public func setSameHeight(views:[UIView], priority: UILayoutPriority? = nil) -> 
 
     return constraints
 }
+
+
 
 public func justifyViews(
         orientation: Orientation,
@@ -253,33 +314,42 @@ public func justifyViews(
 
     var constrains: [NSLayoutConstraint] = []
 
-    if justify != .end {
+    let setDimensions = ([UIView], [CGFloat?], UILayoutPriority?) -> [NSLayoutConstraint] {
+    let setSameDimensions: ([UIView], UILayoutPriority?) -> [NSLayoutConstraint];
+    switch orientation {
+    case .horizontal:
+        setDimensions = setWidths
+        setSameDimensions = setSameWidth
+    case .vertical:
+        setDimensions = setHeights
+        setSameDimensions = setSameHeight
+    }
+
+    setDimensions(views, alongDimensions)
+
+    switch justify {
+    case .start:
         constrains.append(setLeadingConstraint(orientation, views[0], parentView, insets))
-    }
-
-    if justify != .start {
+        constrains += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
+    case .stretch:
+        constrains.append(setLeadingConstraint(orientation, views[0], parentView, insets))
         constrains.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
-    }
-
-    constrains += spaceViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
-
-    if justify == Justify.stretch {
-        let viewsWithUnsetDimensions: [UIView]
-        if let dimensions = alongDimensions {
-            viewsWithUnsetDimensions = (0..<views.count)
-                    .filter { dimensions[$0] == nil }
-                    .map { views[$0] }
-        }
-        else {
-            viewsWithUnsetDimensions = views
-        }
-
-        switch orientation {
-        case .horizontal:
-            constrains += setSameWidth(views: viewsWithUnsetDimensions, priority: 20)
-        case .vertical:
-            constrains += setSameHeight(views: viewsWithUnsetDimensions, priority: 20)
-        }
+        constrains += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
+        let viewsWithUnsetDimensions = getViewsWithUnsetDimensions(orientation, views, alongDimensions)
+        constrains += setSameDimensions(viewsWithUnsetDimensions, 20)
+    case .end:
+        constrains.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
+        constrains += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
+    case .center:
+        constrains += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
+        let (_, spacers) = addOuterViews(views: views)
+        constrains += setSameDimensions(spacers, 20)
+    case .spaceBetween:
+        constrains.append(setLeadingConstraint(orientation, views[0], parentView, insets))
+        constrains.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
+        let (allViews, spacers) = insertSpacerViews(views: views)
+        constrains += chainViews(orientation: orientation, views: allViews, spacing: 0)
+        constrains += setSameDimensions(spacers, 20)
     }
 
     return constrains
@@ -346,7 +416,7 @@ public func stackViews(
 
 
     let defaultAlignment: Alignment?
-    if alignment == nil && individualAlignments == nil {
+    if alignment == nil {
         switch orientation {
         case .horizontal: defaultAlignment = .center
         case .vertical: defaultAlignment = widths == nil ? .fill : .center

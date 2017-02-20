@@ -110,13 +110,13 @@ class OptionsViewController: UIViewController {
     init() {
 
         self.options = StackOptions(
-                orientation: .horizontal,
-                justify: nil,
-                alignment: nil,
+                orientation: .vertical,
+                justify: .start,
+                alignment: .center,
                 insets: UIEdgeInsets.zero,
                 spacing: 0,
-                widths: [nil, nil, nil],
-                heights: [nil, nil, nil],
+                widths: [100, 100, 100],
+                heights: [100, 100, 100],
                 individualAlignments: [nil, nil, nil])
 
         super.init(nibName: nil, bundle: nil)

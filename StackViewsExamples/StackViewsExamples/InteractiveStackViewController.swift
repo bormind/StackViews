@@ -29,17 +29,6 @@ fileprivate func createChildView(title: String) -> UIView {
 
 }
 
-fileprivate func removeConstraint(constraint: NSLayoutConstraint) {
-    if let second = constraint.secondItem as? UIView {
-        second.removeConstraint(constraint)
-    }
-
-    if let first = constraint.firstItem as? UIView {
-        first.removeConstraint(constraint)
-    }
-}
-
-
 fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options: StackOptions) -> StackingResult {
 
     return stackViews(
@@ -73,7 +62,7 @@ class InteractiveStackViewController: UIViewController {
 
     func render(options: StackOptions) {
 
-        self.constraints.forEach(removeConstraint)
+        NSLayoutConstraint.deactivate(self.constraints)
 
         self.constraints = stackWithOptions(parentView: self.view, children: self.children, options: options)
                                 .constraints
