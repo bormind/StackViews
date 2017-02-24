@@ -24,8 +24,9 @@ class MenuTableCell: UITableViewCell {
 
         stackViews(
                 orientation: .horizontal,
+                justify: .fill,
+                align: .center,
                 parentView: self.contentView,
-                justify: .stretch,
                 insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
                 views: [label])
     }

@@ -33,9 +33,9 @@ fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options
 
     return stackViews(
             orientation: options.orientation,
-            parentView: parentView,
             justify: options.justify,
-            alignment: options.alignment,
+            align: options.alignment,
+            parentView: parentView,
             insets: options.insets,
             spacing: options.spacing,
             views: children,

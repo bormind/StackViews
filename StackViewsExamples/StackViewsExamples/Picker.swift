@@ -73,9 +73,9 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
         //Title bar
         let _ = stackViews(orientation: .horizontal,
+                    justify: .fill,
+                    align: .start,
                     parentView: panelView,
-                    justify: .stretch,
-                    alignment: .start,
                     insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
                     views: [leftSpacer, titleLabel, doneButton],
                     widths: [50, nil, 50],
@@ -84,9 +84,9 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         //picker
         let _ = stackViews(
                     orientation: .horizontal,
+                    justify: .fill,
+                    align: .fill,
                     parentView: panelView,
-                    justify: .stretch,
-                    alignment: .fill,
                     insets: UIEdgeInsets(top: 40, left: 0, bottom: 0, right: 0),
                     views: [picker])
     }
@@ -102,9 +102,9 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
         stackViews(
                 orientation: .horizontal,
+                justify: .fill,
+                align: .start,
                 parentView: picker,
-                justify: .stretch,
-                alignment: .start,
                 views: labels)
     }
 
@@ -114,9 +114,9 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
         let _ = stackViews(
                     orientation: .horizontal,
+                    justify: .fill,
+                    align: .center,
                     parentView: container,
-                    justify: .stretch,
-                    alignment: .center,
                     insets: UIEdgeInsets(horizontal: 20),
                     views: [panel],
                     heights: [250])

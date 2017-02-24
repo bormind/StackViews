@@ -25,8 +25,9 @@ class InteractiveExampleViewController: UIViewController {
 
         let _ = stackViews(
                     orientation: .vertical,
+                    justify: .fill,
+                    align: .fill,
                     parentView: self.view,
-                    justify: .stretch,
                     insets: UIEdgeInsets(top: 65, left: 0, bottom: 0, right: 0),
                     views: [optionsViewController.view, stackViewController.view],
                     heights: [200, nil])

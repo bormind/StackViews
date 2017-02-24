@@ -12,13 +12,6 @@ import Foundation
 public enum Orientation {
     case horizontal
     case vertical
-
-    func flip() -> Orientation {
-        switch self {
-        case .horizontal: return .vertical
-        case .vertical: return .horizontal
-        }
-    }
 }
 
 public enum Alignment {
@@ -29,12 +22,11 @@ public enum Alignment {
 }
 
 public enum Justify {
-    case stretch
+    case fill
     case start
     case end
     case spaceBetween
     case center
-//    case distribute
 }
 
 public struct StackingResult {
@@ -120,26 +112,26 @@ fileprivate func addOuterViews(views: [UIView]) -> ([UIView], [UIView]) {
     return (allViews, outerViews)
 }
 
-fileprivate func setAlignment(_ alignmentOrientation: Orientation, _ view: UIView, _ superview: UIView, _ alignment: Alignment, _ insets: UIEdgeInsets) -> [NSLayoutConstraint] {
-    switch (alignmentOrientation, alignment) {
-    case (.horizontal, .start):
+fileprivate func setAlignment(_ orientation: Orientation, _ view: UIView, _ superview: UIView, _ alignment: Alignment, _ insets: UIEdgeInsets) -> [NSLayoutConstraint] {
+    switch (orientation, alignment) {
+    case (.vertical, .start):
         return [constraint(view.leftAnchor, to: superview.leftAnchor, insets.left)]
-    case (.horizontal, .center):
+    case (.vertical, .center):
         return [constraint(view.centerXAnchor, to: superview.centerXAnchor, 0)]
-    case (.horizontal, .end):
+    case (.vertical, .end):
         return [constraint(view.rightAnchor, to: superview.rightAnchor, -insets.right)]
-    case (.horizontal, .fill):
+    case (.vertical, .fill):
         return [
             constraint(view.leftAnchor, to: superview.leftAnchor, insets.left),
             constraint(view.rightAnchor, to: superview.rightAnchor, -insets.right)
         ]
-    case (.vertical, .start):
+    case (.horizontal, .start):
         return [constraint(view.topAnchor, to: superview.topAnchor, insets.top)]
-    case (.vertical, .center):
+    case (.horizontal, .center):
         return [constraint(view.centerYAnchor , to: superview.centerYAnchor, 0)]
-    case (.vertical, .end):
+    case (.horizontal, .end):
         return [constraint(view.bottomAnchor, to: superview.bottomAnchor, -insets.bottom)]
-    case (.vertical, .fill):
+    case (.horizontal, .fill):
         return [
                 constraint(view.topAnchor, to: superview.topAnchor, insets.top),
                 constraint(view.bottomAnchor, to: superview.bottomAnchor, -insets.bottom)
@@ -198,23 +190,17 @@ fileprivate func getViewsWithUnsetDimensions(_ orientation: Orientation, _ views
 
 //if both alignment and individualAlignments are provided than alignment will be used as a default if individualAlignments[i] == nil
 public func alignViews(
-        alignmentOrientation: Orientation,
+        _ align: Alignment,
+        orientation: Orientation,
         parentView: UIView,
         insets: UIEdgeInsets = UIEdgeInsets.zero,
-        alignment: Alignment? = nil,
         views: [UIView],
         individualAlignments: [Alignment?]? = nil) -> [NSLayoutConstraint] {
 
-    assert(alignment != nil || individualAlignments != nil, "Default alignment or individual individualAlignments should be provided")
     assert(individualAlignments == nil || individualAlignments!.count == views.count, propertyCountMismatchMessage)
 
     return (0..<views.count).reduce([]) { acc, i in
-        if let align = individualAlignments?[i] ?? alignment {
-            return acc + setAlignment(alignmentOrientation, views[i], parentView, align, insets)
-        }
-        else {
-            return acc
-        }
+        return acc + setAlignment(orientation, views[i], parentView, individualAlignments?[i] ?? align, insets)
     }
 }
 
@@ -303,10 +289,10 @@ public func setSameHeight(views:[UIView], priority: UILayoutPriority? = nil) -> 
 
 
 public func justifyViews(
+        _ justify: Justify,
         orientation: Orientation,
         parentView: UIView,
         insets: UIEdgeInsets = UIEdgeInsets.zero,
-        justify: Justify,
         spacing: CGFloat? = nil,
         views: [UIView],
         alongDimensions: [CGFloat?]? = nil,
@@ -314,7 +300,7 @@ public func justifyViews(
 
     var constrains: [NSLayoutConstraint] = []
 
-    let setDimensions = ([UIView], [CGFloat?], UILayoutPriority?) -> [NSLayoutConstraint] {
+    let setDimensions: ([UIView], [CGFloat?], UILayoutPriority?) -> [NSLayoutConstraint]
     let setSameDimensions: ([UIView], UILayoutPriority?) -> [NSLayoutConstraint];
     switch orientation {
     case .horizontal:
@@ -325,13 +311,15 @@ public func justifyViews(
         setSameDimensions = setSameHeight
     }
 
-    setDimensions(views, alongDimensions)
+    if let alongDimensions = alongDimensions {
+        setDimensions(views, alongDimensions, nil)
+    }
 
     switch justify {
     case .start:
         constrains.append(setLeadingConstraint(orientation, views[0], parentView, insets))
         constrains += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
-    case .stretch:
+    case .fill:
         constrains.append(setLeadingConstraint(orientation, views[0], parentView, insets))
         constrains.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
         constrains += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0, individualSpacings: individualSpacings)
@@ -358,9 +346,9 @@ public func justifyViews(
 
 public func stackViews(
         orientation: Orientation,
+        justify: Justify,
+        align: Alignment,
         parentView: UIView,
-        justify: Justify? = nil,
-        alignment: Alignment? = nil,
         insets: UIEdgeInsets = UIEdgeInsets.zero,
         spacing: CGFloat? = nil,
         views: [UIView],
@@ -405,32 +393,20 @@ public func stackViews(
     }
 
     constraints += justifyViews(
+                        justify,
                         orientation: orientation,
                         parentView: parentView,
                         insets: insets,
-                        justify: justify ?? .start,
                         spacing: spacing,
                         views: views,
                         alongDimensions: alongDimensions,
                         individualSpacings: individualSpacings)
 
-
-    let defaultAlignment: Alignment?
-    if alignment == nil {
-        switch orientation {
-        case .horizontal: defaultAlignment = .center
-        case .vertical: defaultAlignment = widths == nil ? .fill : .center
-        }
-    }
-    else {
-        defaultAlignment = alignment
-    }
-
     constraints += alignViews(
-            alignmentOrientation: orientation.flip(),
+            align,
+            orientation: orientation,
             parentView: parentView,
             insets: insets,
-            alignment: defaultAlignment,
             views: views,
             individualAlignments: individualAlignments)
 

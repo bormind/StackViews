@@ -9,8 +9,8 @@ import StackViews
 
 struct StackOptions {
     var orientation: Orientation
-    var justify: Justify?
-    var alignment: Alignment?
+    var justify: Justify
+    var alignment: Alignment
     var insets: UIEdgeInsets
     var spacing: CGFloat
     var widths: [CGFloat?]
@@ -28,8 +28,9 @@ fileprivate func labeledRow(_ label: String, _ ctrl: UIView) -> UIView {
 
     let _ = stackViews(
             orientation: .horizontal,
+            justify: .fill,
+            align: .center,
             parentView: row,
-            justify: .stretch,
             views: [labelCtrl, ctrl],
             widths: [100, nil])
 
@@ -84,8 +85,7 @@ fileprivate func getMultiComponentIndexes<T: Equatable>(components:[[T?]], value
     }
 }
 
-fileprivate let supportedAlignments: [Alignment?] = [
-        nil,
+fileprivate let supportedAlignments: [Alignment] = [
         Alignment.fill,
         Alignment.start,
         Alignment.center,
@@ -145,9 +145,9 @@ class OptionsViewController: UIViewController {
 
         let _ = stackViews(
                 orientation: .vertical,
-                parentView: self.view,
                 justify: .start,
-                alignment: .fill,
+                align: .fill,
+                parentView: self.view,
                 insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
                 spacing: 5,
                 views: controlsWithLabels.map(labeledRow),
@@ -172,7 +172,7 @@ class OptionsViewController: UIViewController {
     }
 
     func onJustification() {
-        let items: [Justify?] = [nil, .stretch, .start, .end]
+        let items: [Justify] = [.fill, .start, .end, .spaceBetween, .center]
         let currentIndex = items.index(where: { $0 == self.options.justify }) ?? 0
         let titles = items.map(formatEnumValue)
 
@@ -236,7 +236,8 @@ class OptionsViewController: UIViewController {
     }
 
     func onIndividualAlignments() {
-        let items: [[Alignment?]] = [supportedAlignments, supportedAlignments, supportedAlignments]
+        let individualAlignments: [Alignment?] = [nil] + supportedAlignments
+        let items: [[Alignment?]] = [individualAlignments, individualAlignments, individualAlignments]
         let titles = items.map { $0.map(formatEnumValue) }
         let currentIndexes = getMultiComponentIndexes(components: items, values: self.options.individualAlignments)
 
