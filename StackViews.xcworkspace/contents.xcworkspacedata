@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:StackViews.xcodeproj">
+      location = "group:StackViewsExamples/StackViewsExamples.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:StackViews/StackViews.xcodeproj">
    </FileRef>
 </Workspace>

@@ -34,7 +34,7 @@ fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options
     return stackViews(
             orientation: options.orientation,
             justify: options.justify,
-            align: options.alignment,
+            align: options.align,
             parentView: parentView,
             insets: options.insets,
             spacing: options.spacing,
@@ -49,11 +49,13 @@ class InteractiveStackViewController: UIViewController {
 
     let children:[UIView]
 
-    var constraints: [NSLayoutConstraint] = []
+    var stackingResult: StackingResult?
 
     init() {
         self.children = ["View1", "View2", "View3"].map { createChildView(title: $0) }
         super.init(nibName: nil, bundle: nil)
+
+        self.view.layer.borderWidth = 2
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -62,9 +64,7 @@ class InteractiveStackViewController: UIViewController {
 
     func render(options: StackOptions) {
 
-        NSLayoutConstraint.deactivate(self.constraints)
-
-        self.constraints = stackWithOptions(parentView: self.view, children: self.children, options: options)
-                                .constraints
+        self.stackingResult?.clearConstraints()
+        self.stackingResult = stackWithOptions(parentView: self.view, children: self.children, options: options)
     }
 }

@@ -10,13 +10,23 @@ import StackViews
 struct StackOptions {
     var orientation: Orientation
     var justify: Justify
-    var alignment: Alignment
+    var align: Alignment
     var insets: UIEdgeInsets
     var spacing: CGFloat
     var widths: [CGFloat?]
     var heights: [CGFloat?]
     var individualAlignments: [Alignment?]
 }
+
+fileprivate let initialOptions = StackOptions(
+        orientation: .vertical,
+        justify: .spaceBetween,
+        align: .center,
+        insets: UIEdgeInsets.zero,
+        spacing: 0,
+        widths: [100, 100, 100],
+        heights: [100, 100, 100],
+        individualAlignments: [nil, nil, nil])
 
 
 fileprivate func labeledRow(_ label: String, _ ctrl: UIView) -> UIView {
@@ -32,7 +42,7 @@ fileprivate func labeledRow(_ label: String, _ ctrl: UIView) -> UIView {
             align: .center,
             parentView: row,
             views: [labelCtrl, ctrl],
-            widths: [100, nil])
+            widths: [200, nil])
 
     return row
 }
@@ -109,15 +119,7 @@ class OptionsViewController: UIViewController {
 
     init() {
 
-        self.options = StackOptions(
-                orientation: .vertical,
-                justify: .start,
-                alignment: .center,
-                insets: UIEdgeInsets.zero,
-                spacing: 0,
-                widths: [100, 100, 100],
-                heights: [100, 100, 100],
-                individualAlignments: [nil, nil, nil])
+        self.options = initialOptions
 
         super.init(nibName: nil, bundle: nil)
 
@@ -125,7 +127,7 @@ class OptionsViewController: UIViewController {
 
         let controlsWithLabels = [("Orientation:", orientationButton),
                                   ("Justify:", justifyButton),
-                                  ("Alignment", alignmentButton),
+                                  ("Align:", alignmentButton),
                                   ("Insets:", insetsButton),
                                   ("Spacing:", spacingButton),
                                   ("Widths:", widths),
@@ -196,11 +198,11 @@ class OptionsViewController: UIViewController {
 
     func onAlignment() {
 
-        let currentIndex = supportedAlignments.index(where: { $0 ==? self.options.alignment }) ?? 0
+        let currentIndex = supportedAlignments.index(where: { $0 ==? self.options.align }) ?? 0
         let titles = supportedAlignments.map(formatEnumValue)
 
         onPickProperty("Alignment", [titles], [currentIndex]) {
-            self.options.alignment = supportedAlignments[$0[0]]
+            self.options.align = supportedAlignments[$0[0]]
         }
     }
 
@@ -259,7 +261,7 @@ class OptionsViewController: UIViewController {
     private func updateUI() {
         orientationButton.setTitle(formatEnumValue(self.options.orientation), for: .normal)
         justifyButton.setTitle(formatEnumValue(self.options.justify), for: .normal)
-        alignmentButton.setTitle(formatEnumValue(self.options.alignment), for: .normal)
+        alignmentButton.setTitle(formatEnumValue(self.options.align), for: .normal)
         insetsButton.setTitle(formatInsets(self.options.insets), for: .normal)
         spacingButton.setTitle("\(Int(self.options.spacing))", for: .normal)
         widths.setTitle(formatNumericArray(self.options.widths), for: .normal)
