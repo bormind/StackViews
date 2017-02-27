@@ -237,7 +237,6 @@ fileprivate func constraintSpacer(_ spacers: [UIView], _ inParent: UIView, _ ori
     switch orientation {
     case .horizontal:
         setCrossDimension = { view, val in view.heightAnchor.constraint(equalToConstant: val) }
-
     case .vertical:
         setCrossDimension = { view, val in view.widthAnchor.constraint(equalToConstant: val) }
     }
@@ -424,8 +423,8 @@ public func stackViews(
             let (allViews, spacers, constraints) = addViewsBetween(views, parentView, orientation)
             result.generatedViews += spacers
             result.constraints += constraints
-            result.constraints.append(setLeadingConstraint(orientation, views[0], parentView, insets))
-            result.constraints.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
+            result.constraints.append(setLeadingConstraint(orientation, allViews[0], parentView, insets))
+            result.constraints.append(setTrailingConstraint(orientation, allViews[allViews.count - 1], parentView, insets))
             result.constraints += chainViews(orientation: orientation, views: allViews, spacing: 0)
         }
     }
