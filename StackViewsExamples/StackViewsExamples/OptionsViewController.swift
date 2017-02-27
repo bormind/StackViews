@@ -20,7 +20,7 @@ struct StackOptions {
 
 fileprivate let initialOptions = StackOptions(
         orientation: .vertical,
-        justify: .spaceBetween,
+        justify: .center,
         align: .center,
         insets: UIEdgeInsets.zero,
         spacing: 0,

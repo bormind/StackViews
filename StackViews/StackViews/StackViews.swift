@@ -12,6 +12,13 @@ import Foundation
 public enum Orientation {
     case horizontal
     case vertical
+
+    func flip() -> Orientation {
+        switch self {
+        case .horizontal: return .vertical
+        case.vertical: return .horizontal
+        }
+    }
 }
 
 public enum Alignment {
@@ -69,12 +76,6 @@ fileprivate func constraint(_ anch: NSLayoutDimension, toValue: CGFloat) -> NSLa
 
 fileprivate let propertyCountMismatchMessage = "Child view properties should be provided for each view in the array, nil can be used to indicate use of container wide defaults"
 
-fileprivate func getAxisDimensions(_ orientation: Orientation, _ widths: [CGFloat?]?, _ heights: [CGFloat?]?, _ viewCount: Int) -> ([CGFloat?]?, [CGFloat?]?) {
-    switch orientation {
-    case .horizontal: return (widths, heights)
-    case .vertical: return (heights, widths)
-    }
-}
 
 public func setLeadingConstraint(_ orientation: Orientation, _ view: UIView, _ superview: UIView, _ insets: UIEdgeInsets) -> NSLayoutConstraint {
     switch orientation {
@@ -84,7 +85,6 @@ public func setLeadingConstraint(_ orientation: Orientation, _ view: UIView, _ s
         return constraint(view.topAnchor, to: superview.topAnchor, insets.top)
     }
 }
-
 
 public func setTrailingConstraint(_ orientation: Orientation, _ view: UIView, _ superview: UIView, _ insets: UIEdgeInsets) -> NSLayoutConstraint {
     switch orientation {
@@ -97,29 +97,38 @@ public func setTrailingConstraint(_ orientation: Orientation, _ view: UIView, _ 
 
 
 //Returns tuple of new array of all the views and spacer views only
-fileprivate func addViewsBetween(views: [UIView], inParent: UIView) -> ([UIView], [UIView]) {
+fileprivate func addViewsBetween(_ views: [UIView], _ inParent: UIView, _ orientation: Orientation) -> ([UIView], [UIView], [NSLayoutConstraint]) {
     if views.count < 2 {
-        return (views, [])
+        return (views, [], [])
     }
 
     let spacerViews = (0..<views.count - 1).map { _ in UIView() }
-    spacerViews.forEach(inParent.addSubview)
+    spacerViews.forEach {
+        inParent.addSubview($0)
+        $0.translatesAutoresizingMaskIntoConstraints = false
+    }
+
+    let constraints = constraintSpacer(spacerViews, inParent, orientation)
 
     let allViews = (0..<spacerViews.count).reduce([views[0]]) { acc, i in
         return acc + [spacerViews[i], views[i + 1]]
     }
 
-    return (allViews, spacerViews)
+    return (allViews, spacerViews, constraints)
 }
 
-//Returns tuple of new array of all the views and outer views only
-fileprivate func addViewsAround(views: [UIView], inParent: UIView) -> ([UIView], [UIView]) {
+fileprivate func addViewsAround(_ views: [UIView], _ inParent: UIView, _ orientation: Orientation) -> ([UIView], [UIView], [NSLayoutConstraint]) {
     let outerViews = [UIView(), UIView()]
-    outerViews.forEach(inParent.addSubview)
+    outerViews.forEach {
+        inParent.addSubview($0)
+        $0.translatesAutoresizingMaskIntoConstraints = false
+    }
+
+    let constraints = constraintSpacer(outerViews, inParent, orientation)
 
     let allViews = [outerViews[0]] + views + [outerViews[1]]
 
-    return (allViews, outerViews)
+    return (allViews, outerViews, constraints)
 }
 
 fileprivate func setAlignment(_ orientation: Orientation, _ view: UIView, _ superview: UIView, _ alignment: Alignment, _ insets: UIEdgeInsets) -> [NSLayoutConstraint] {
@@ -196,6 +205,46 @@ fileprivate func getViewsWithUnsetDimensions(_ orientation: Orientation, _ views
                     return dimensions?[$0] == nil && !hasIntrinsicDimension(views[$0])
                 }
                 .map { views[$0] }
+}
+
+fileprivate func constraintToCenter(_ orientation: Orientation) -> (UIView, UIView) -> NSLayoutConstraint {
+    return { view, parentView in
+        switch orientation {
+        case .horizontal:
+            return constraint(view.centerXAnchor, to: parentView.centerXAnchor, 0)
+        case .vertical:
+            return constraint(view.centerYAnchor, to: parentView.centerYAnchor, 0)
+        }
+    }
+}
+
+fileprivate func setSameDimensions(_ orientation: Orientation) -> ([UIView], UILayoutPriority?) -> [NSLayoutConstraint] {
+    return { views, priority in
+        switch orientation {
+        case .horizontal:
+            return setSameWidth(views: views, priority: priority)
+        case .vertical:
+            return setSameHeight(views: views, priority: priority)
+        }
+    }
+}
+
+fileprivate func constraintSpacer(_ spacers: [UIView], _ inParent: UIView, _ orientation: Orientation) -> [NSLayoutConstraint] {
+
+    let setCenter = constraintToCenter(orientation.flip())
+    let setCrossDimension: (UIView, CGFloat) -> NSLayoutConstraint
+
+    switch orientation {
+    case .horizontal:
+        setCrossDimension = { view, val in view.heightAnchor.constraint(equalToConstant: val) }
+
+    case .vertical:
+        setCrossDimension = { view, val in view.widthAnchor.constraint(equalToConstant: val) }
+    }
+
+    return setSameDimensions(orientation)(spacers, nil)
+            + spacers.map { setCrossDimension($0, 10) }
+            + spacers.map { setCenter($0, inParent) }
 }
 
 //if both alignment and individualAlignments are provided than alignment will be used as a default if individualAlignments[i] == nil
@@ -297,64 +346,6 @@ public func setSameHeight(views:[UIView], priority: UILayoutPriority? = nil) -> 
 
 
 
-public func justifyViews(
-        _ justify: Justify,
-        orientation: Orientation,
-        parentView: UIView,
-        insets: UIEdgeInsets = UIEdgeInsets.zero,
-        spacing: CGFloat? = nil,
-        views: [UIView],
-        alongDimensions: [CGFloat?]? = nil) -> StackingResult {
-
-
-    var result = StackingResult()
-
-    let setDimensions: ([UIView], [CGFloat?], UILayoutPriority?) -> [NSLayoutConstraint]
-    let setSameDimensions: ([UIView], UILayoutPriority?) -> [NSLayoutConstraint];
-    switch orientation {
-    case .horizontal:
-        setDimensions = setWidths
-        setSameDimensions = setSameWidth
-    case .vertical:
-        setDimensions = setHeights
-        setSameDimensions = setSameHeight
-    }
-
-    if let alongDimensions = alongDimensions {
-        result.constraints += setDimensions(views, alongDimensions, nil)
-    }
-
-    switch justify {
-    case .start:
-        result.constraints.append(setLeadingConstraint(orientation, views[0], parentView, insets))
-        result.constraints += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0)
-    case .fill:
-        result.constraints.append(setLeadingConstraint(orientation, views[0], parentView, insets))
-        result.constraints.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
-        result.constraints += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0)
-        let viewsWithUnsetDimensions = getViewsWithUnsetDimensions(orientation, views, alongDimensions)
-        result.constraints += setSameDimensions(viewsWithUnsetDimensions, 20)
-    case .end:
-        result.constraints.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
-        result.constraints += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0)
-    case .center:
-        let (allViews, spacers) = addViewsAround(views: views, inParent: parentView)
-        result.generatedViews += spacers
-        result.constraints += chainViews(orientation: orientation, views: allViews, spacing: spacing ?? 0)
-        result.constraints += setSameDimensions(spacers, 20)
-    case .spaceBetween:
-        let (allViews, spacers) = addViewsBetween(views: views, inParent: parentView)
-        result.generatedViews += spacers
-        result.constraints.append(setLeadingConstraint(orientation, views[0], parentView, insets))
-        result.constraints.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
-        result.constraints += chainViews(orientation: orientation, views: allViews, spacing: 0)
-        result.constraints += setSameDimensions(spacers, 20)
-    }
-
-    return result
-}
-
-
 public func stackViews(
         orientation: Orientation,
         justify: Justify,
@@ -382,8 +373,6 @@ public func stackViews(
         $0.translatesAutoresizingMaskIntoConstraints = false
     }
 
-
-
     if let widths = widths {
         result.constraints += setWidths(views: views, widths: widths)
     }
@@ -399,19 +388,47 @@ public func stackViews(
     case .horizontal:
         alongDimensions = widths
         crossDimensions = heights
+
     case .vertical:
         alongDimensions = heights
         crossDimensions = widths
     }
 
-    result += justifyViews(
-                        justify,
-                        orientation: orientation,
-                        parentView: parentView,
-                        insets: insets,
-                        spacing: spacing,
-                        views: views,
-                        alongDimensions: alongDimensions)
+    switch justify {
+    case .start:
+        result.constraints.append(setLeadingConstraint(orientation, views[0], parentView, insets))
+        result.constraints += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0)
+    case .fill:
+        result.constraints.append(setLeadingConstraint(orientation, views[0], parentView, insets))
+        result.constraints.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
+        result.constraints += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0)
+        let viewsWithUnsetDimensions = getViewsWithUnsetDimensions(orientation, views, alongDimensions)
+        result.constraints += setSameDimensions(orientation)(viewsWithUnsetDimensions, nil)
+    case .end:
+        result.constraints.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
+        result.constraints += chainViews(orientation: orientation, views: views, spacing: spacing ?? 0)
+    case .center:
+        if views.count == 1 {
+            result.constraints.append(constraintToCenter(orientation)(views[0], parentView))
+        }
+        else {
+            let (allViews, spacers, constraints) = addViewsAround(views, parentView, orientation)
+            result.generatedViews += spacers
+            result.constraints += constraints
+            result.constraints.append(setLeadingConstraint(orientation, allViews[0], parentView, insets))
+            result.constraints.append(setTrailingConstraint(orientation, allViews[allViews.count - 1], parentView, insets))
+            result.constraints += chainViews(orientation: orientation, views: allViews, spacing: spacing ?? 0)
+        }
+    case .spaceBetween:
+        if views.count > 1 {
+            let (allViews, spacers, constraints) = addViewsBetween(views, parentView, orientation)
+            result.generatedViews += spacers
+            result.constraints += constraints
+            result.constraints.append(setLeadingConstraint(orientation, views[0], parentView, insets))
+            result.constraints.append(setTrailingConstraint(orientation, views[views.count - 1], parentView, insets))
+            result.constraints += chainViews(orientation: orientation, views: allViews, spacing: 0)
+        }
+    }
 
     result += alignViews(
             align,
