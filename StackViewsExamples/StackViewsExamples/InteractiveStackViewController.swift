@@ -22,7 +22,8 @@ fileprivate func createChildView(title: String) -> UIView {
 
     label.translatesAutoresizingMaskIntoConstraints = false
 
-    view.backgroundColor = UIColor(hex: 0x66DF9C)
+//    view.backgroundColor = UIColor(hex: 0x66DF9C)
+//    view.backgroundColor = UIColor.barColor
     view.layer.borderWidth = 1
 
     return view
@@ -31,11 +32,10 @@ fileprivate func createChildView(title: String) -> UIView {
 
 fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options: StackOptions) -> StackingResult {
 
-    return stackViews(
+    return parentView.stackViews(
             orientation: options.orientation,
             justify: options.justify,
             align: options.align,
-            parentView: parentView,
             insets: options.insets,
             spacing: options.spacing,
             views: children,
@@ -47,12 +47,13 @@ fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options
 
 class InteractiveStackViewController: UIViewController {
 
+    let viewTitles = ["View1", "View2", "View3"]
     let children:[UIView]
 
     var stackingResult: StackingResult?
 
     init() {
-        self.children = ["View1", "View2", "View3"].map { createChildView(title: $0) }
+        self.children = viewTitles.map { createChildView(title: $0) }
         super.init(nibName: nil, bundle: nil)
 
         self.view.layer.borderWidth = 2

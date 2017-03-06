@@ -34,13 +34,12 @@ fileprivate func labeledRow(_ label: String, _ ctrl: UIView) -> UIView {
 
     let labelCtrl = UILabel()
     labelCtrl.text = label
-    labelCtrl.backgroundColor = UIColor.orange
+    labelCtrl.backgroundColor = UIColor.barColor
 
-    let _ = stackViews(
+    let _ = row.stackViews(
             orientation: .horizontal,
             justify: .fill,
             align: .center,
-            parentView: row,
             views: [labelCtrl, ctrl],
             widths: [200, nil])
 
@@ -55,7 +54,7 @@ fileprivate func formatInsets(_ insets: UIEdgeInsets) -> String {
 }
 
 fileprivate func formatButton(_ button: UIButton) {
-    button.setTitleColor(UIColor.black, for: .normal)
+    button.setTitleColor(UIColor.blue, for: .normal)
 }
 
 //fileprivate func formatEnumValue <T: CustomStringConvertible> (val: T) -> String {
@@ -117,13 +116,16 @@ class OptionsViewController: UIViewController {
 
     var optionsChanged: (()->())?
 
-    init() {
+    let viewTitles: [String]
 
+    init(viewTitles: [String]) {
+        self.viewTitles = viewTitles
         self.options = initialOptions
 
         super.init(nibName: nil, bundle: nil)
 
-        self.view.backgroundColor = UIColor(hex: 0x92E2E7)
+//        self.view.backgroundColor = UIColor(hex: 0x92E2E7)
+        self.view.backgroundColor = UIColor.barColor
 
         let controlsWithLabels = [("Orientation:", orientationButton),
                                   ("Justify:", justifyButton),
@@ -145,11 +147,10 @@ class OptionsViewController: UIViewController {
         heights.addTarget(self, action: #selector(onHeights), for: .touchUpInside)
         individualAlignments.addTarget(self, action: #selector(onIndividualAlignments), for: .touchUpInside)
 
-        let _ = stackViews(
+        let _ = self.view.stackViews(
                 orientation: .vertical,
                 justify: .start,
                 align: .fill,
-                parentView: self.view,
                 insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
                 spacing: 5,
                 views: controlsWithLabels.map(labeledRow),
@@ -218,10 +219,10 @@ class OptionsViewController: UIViewController {
 
     func onWidths() {
         let items: [[CGFloat?]] = [[nil, 100, 200], [nil, 100, 200], [nil, 100, 200]]
-        let titles = items.map(formatNumericValues)
+        let stringValues = items.map(formatNumericValues)
         let currentIndexes = getMultiComponentIndexes(components: items, values: self.options.widths)
 
-        onPickProperty("Widths", titles, currentIndexes) {
+        onPickProperty("Widths", stringValues, currentIndexes, viewTitles) {
             self.options.widths = $0.enumerated().map { comp, ix in items[comp][ix] }
         }
 
@@ -232,7 +233,7 @@ class OptionsViewController: UIViewController {
         let titles = items.map(formatNumericValues)
         let currentIndexes = getMultiComponentIndexes(components: items, values: self.options.heights)
 
-        onPickProperty("Heights", titles, currentIndexes) {
+        onPickProperty("Heights", titles, currentIndexes, viewTitles) {
             self.options.heights = $0.enumerated().map { comp, ix in items[comp][ix] }
         }
     }
@@ -243,7 +244,7 @@ class OptionsViewController: UIViewController {
         let titles = items.map { $0.map(formatEnumValue) }
         let currentIndexes = getMultiComponentIndexes(components: items, values: self.options.individualAlignments)
 
-        onPickProperty("Individual Alignments", titles, currentIndexes) {
+        onPickProperty("Individual Alignments", titles, currentIndexes, viewTitles) {
             self.options.individualAlignments = $0.enumerated().map { comp, ix in items[comp][ix] }
         }
     }

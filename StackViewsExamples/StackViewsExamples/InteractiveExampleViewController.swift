@@ -11,23 +11,26 @@ import StackViews
 
 class InteractiveExampleViewController: UIViewController {
 
-    let optionsViewController = OptionsViewController()
-    let stackViewController = InteractiveStackViewController()
+    let stackViewController: InteractiveStackViewController
+    let optionsViewController: OptionsViewController
 
     init() {
 
+        self.stackViewController = InteractiveStackViewController()
+        self.optionsViewController = OptionsViewController(viewTitles: stackViewController.viewTitles)
+
         super.init(nibName: nil, bundle: nil)
+
         self.view.backgroundColor = UIColor.white
 
         title = "Interactive StackViews"
 
         optionsViewController.optionsChanged = self.onOptionsChanged
 
-        let _ = stackViews(
+        let _ = self.view.stackViews(
                     orientation: .vertical,
                     justify: .fill,
                     align: .fill,
-                    parentView: self.view,
                     insets: UIEdgeInsets(top: 65, left: 0, bottom: 0, right: 0),
                     views: [optionsViewController.view, stackViewController.view],
                     heights: [210, nil])

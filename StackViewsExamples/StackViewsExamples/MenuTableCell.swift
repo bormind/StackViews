@@ -22,11 +22,10 @@ class MenuTableCell: UITableViewCell {
 //        label.backgroundColor = UIColor.orange
 //        label.textColor = UIColor.black
 
-        stackViews(
+        self.contentView.stackViews(
                 orientation: .horizontal,
                 justify: .fill,
                 align: .center,
-                parentView: self.contentView,
                 insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
                 views: [label])
     }
