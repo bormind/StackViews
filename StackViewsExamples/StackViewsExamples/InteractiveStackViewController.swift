@@ -19,10 +19,9 @@ fileprivate func createChildView(title: String) -> UIView {
     label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
     label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
 
-
     label.translatesAutoresizingMaskIntoConstraints = false
 
-//    view.backgroundColor = UIColor(hex: 0x66DF9C)
+    view.backgroundColor = UIColor(hex: 0x66DF9C)
 //    view.backgroundColor = UIColor.barColor
     view.layer.borderWidth = 1
 

@@ -146,21 +146,13 @@ fileprivate extension UIView {
 
 fileprivate let propertyCountMismatchMessage = "Child view properties should be provided for each view in the array, nil can be used to indicate use of container wide defaults"
 
-
-
-public func chainViews(
-        orientation: Orientation,
-        views: [UIView],
-        spacing: CGFloat = 0) -> [NSLayoutConstraint] {
-
-    if views.count < 2 {
-        return []
-    }
-
-    return (0..<views.count - 1).reduce([]) { acc, i in
-        return acc + [views[i + 1].chainTo(orientation, views[i], spacing)]
-    }
+fileprivate enum SnappingOptions {
+    case noSnap
+    case snapToStart
+    case snapToEnd
+    case snapToBoth
 }
+
 
 
 //private helper functions
@@ -175,28 +167,71 @@ extension UIView {
         view.translatesAutoresizingMaskIntoConstraints = false
     }
 
-    fileprivate func alignSpacerViews(_ views: [UIView], _ orientation: Orientation) -> [NSLayoutConstraint] {
+    fileprivate func alignSpacerViews(_ orientation: Orientation, _ views: [UIView]) -> [NSLayoutConstraint] {
         return views.map { $0.setDimension(orientation.flip(), 10) }
              + views.map { $0.snapToCenter(orientation.flip(), self) }
 
     }
+
+    fileprivate func arrangeSpacerViews(_ orientation: Orientation, _ views: [UIView]) -> [NSLayoutConstraint] {
+
+        let flexValues = [CGFloat](repeating: 1, count: views.count)
+        return
+            flexViews(orientation: orientation, views: views, flexValues: flexValues)
+            + alignSpacerViews(orientation, views)
+
+    }
+
+    fileprivate func chainViews(
+            _ snappingOptions: SnappingOptions,
+            _ orientation: Orientation,
+            _ insets: UIEdgeInsets,
+            _ spacing: CGFloat,
+            _ views: [UIView]) -> [NSLayoutConstraint] {
+
+        if views.isEmpty {
+            return []
+        }
+
+        var constraints:[NSLayoutConstraint] = []
+
+        constraints += (0..<views.count - 1).reduce([]) { acc, i in
+            return acc + [views[i + 1].chainTo(orientation, views[i], spacing)]
+        }
+
+        switch snappingOptions {
+        case .snapToStart:
+            constraints.append(views[0].snapToStart(orientation, self, insets.start(orientation)))
+        case .snapToEnd:
+            constraints.append(views[views.count - 1].snapToEnd(orientation, self, -insets.end(orientation)))
+        case .snapToBoth:
+            constraints.append(views[0].snapToStart(orientation, self, insets.start(orientation)))
+            constraints.append(views[views.count - 1].snapToEnd(orientation, self, -insets.end(orientation)))
+        case .noSnap:
+            break
+        }
+
+        return constraints
+    }
+
 
     fileprivate func alignView(_ orientation: Orientation,
                                 _ alignment: Alignment,
                                 _ view: UIView,
                                 _ insets: UIEdgeInsets) -> [NSLayoutConstraint] {
 
+        let flippedOrientation = orientation.flip()
         switch alignment {
         case .start:
-            return [view.snapToStart(orientation, self, insets.start(orientation))]
+            return [view.snapToStart(flippedOrientation, self, insets.start(flippedOrientation))]
         case .center:
-            return [view.snapToCenter(orientation, self)]
+            return [view.snapToCenter(flippedOrientation, self)]
         case .end:
-            return [view.snapToEnd(orientation, self, -insets.end(orientation))]
+            return [view.snapToEnd(flippedOrientation, self, -insets.end(flippedOrientation))]
         case .fill:
             return [
-                    view.snapToStart(orientation, self, insets.start(orientation)),
-                    view.snapToEnd(orientation, self, -insets.end(orientation))
+                    view.snapToStart(flippedOrientation, self, insets.start(flippedOrientation)),
+                    view.snapToEnd(flippedOrientation, self, -insets.end(flippedOrientation))
             ]
         }
     }
@@ -262,15 +297,11 @@ public extension UIView {
 
         switch justify {
         case .start:
-            constraints.append(views[0].snapToStart(orientation, self, insets.start(orientation)))
-            constraints += chainViews(orientation: orientation, views: views, spacing: spacing)
+            constraints += chainViews(.snapToStart, orientation, insets, spacing, views)
         case .fill:
-            constraints.append(views[0].snapToStart(orientation, self, insets.start(orientation)))
-            constraints.append(views[views.count - 1].snapToEnd(orientation, self, insets.end(orientation)))
-            constraints += chainViews(orientation: orientation, views: views, spacing: spacing)
+            constraints += chainViews(.snapToBoth, orientation, insets, spacing, views)
         case .end:
-            constraints.append(views[views.count - 1].snapToEnd(orientation, self, insets.end(orientation)))
-            constraints += chainViews(orientation: orientation, views: views, spacing: spacing)
+            constraints += chainViews(.snapToEnd, orientation, insets, spacing, views)
         case .center:
             if views.count == 1 {
                 constraints.append(views[0].snapToCenter(orientation, self))
@@ -278,19 +309,15 @@ public extension UIView {
             else {
                 let (allViews, spacers) = addViewsAround(views, orientation)
                 generatedViews += spacers
-                constraints += alignSpacerViews(spacers, orientation)
-                constraints.append(allViews[0].snapToStart(orientation, self, insets.start(orientation)))
-                constraints.append(allViews[allViews.count - 1].snapToEnd(orientation, self, insets.end(orientation)))
-                constraints += chainViews(orientation: orientation, views: allViews, spacing: spacing ?? 0)
+                constraints += arrangeSpacerViews(orientation, spacers)
+                constraints += chainViews(.snapToBoth, orientation, insets, spacing, allViews)
             }
         case .spaceBetween:
             if views.count > 1 {
                 let (allViews, spacers) = addViewsBetween(views, orientation)
                 generatedViews += spacers
-                constraints += alignSpacerViews(spacers, orientation)
-                constraints.append(allViews[0].snapToStart(orientation, self, insets.start(orientation)))
-                constraints.append(allViews[allViews.count - 1].snapToEnd(orientation, self, insets.end(orientation)))
-                constraints += chainViews(orientation: orientation, views: allViews, spacing: 0)
+                constraints += arrangeSpacerViews(orientation, spacers)
+                constraints += chainViews(.snapToBoth, orientation, insets, spacing, allViews)
             }
         }
 

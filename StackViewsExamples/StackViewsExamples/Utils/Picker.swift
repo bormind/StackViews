@@ -98,12 +98,13 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             return label
         }
 
-        picker.stackViews(
+        _ = picker.stackViews(
                 orientation: .horizontal,
                 justify: .fill,
                 align: .start,
                 spacing: 5,
-                views: labels)
+                views: labels,
+                flex: [CGFloat](repeating: 1, count: labels.count))
     }
 
     private func createPanelView(container: UIView) -> UIView {
