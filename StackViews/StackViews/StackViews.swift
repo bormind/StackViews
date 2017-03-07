@@ -141,6 +141,14 @@ fileprivate extension UIView {
         case .vertical: return self.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
         }
     }
+
+    func sameFirstBaseLine(_ view: UIView) -> NSLayoutConstraint {
+        return self.firstBaselineAnchor.constraint(equalTo: view.firstBaselineAnchor)
+    }
+
+    func sameLastBaseLine(_ view: UIView) -> NSLayoutConstraint {
+        return self.lastBaselineAnchor.constraint(equalTo: view.lastBaselineAnchor)
+    }
 }
 
 
@@ -176,10 +184,11 @@ extension UIView {
     fileprivate func arrangeSpacerViews(_ orientation: Orientation, _ views: [UIView]) -> [NSLayoutConstraint] {
 
         let flexValues = [CGFloat](repeating: 1, count: views.count)
-        return
-            flexViews(orientation: orientation, views: views, flexValues: flexValues)
+        let constraints =
+            flexViews(orientation: orientation, views: views, flexValues: flexValues).constraints
             + alignSpacerViews(orientation, views)
 
+        return constraints
     }
 
     fileprivate func chainViews(
@@ -266,19 +275,49 @@ extension UIView {
 }
 
 //public functions
-public func flexViews(orientation: Orientation, views:[UIView], flexValues:[CGFloat], keyIndex: Int = 0, priority: UILayoutPriority? = nil) -> [NSLayoutConstraint] {
+public func flexViews(orientation: Orientation,
+                      views:[UIView],
+                      flexValues:[CGFloat?],
+                      dimensions: [CGFloat?]? = nil,
+                      priority: UILayoutPriority? = nil) -> StackingResult {
+
     assert(views.count == flexValues.count)
-    if views.count < 2 {
-        return []
+    assert(dimensions == nil || views.count == dimensions!.count)
+
+    let flexIndexes = (0..<flexValues.count).filter { flexValues[$0] != nil }
+
+    if flexIndexes.count < 2 {
+        return StackingResult()
     }
 
-    let keyFlexVal = flexValues[keyIndex]
+    let keyIndex: Int
+    var errors: [String] = []
+    if let dimensions = dimensions {
+        let indexesForSetDimensions = flexIndexes.filter { dimensions[$0] != nil }
 
-    return (0..<views.count)
+        if indexesForSetDimensions.count > 0 {
+            keyIndex = indexesForSetDimensions[0]
+            if indexesForSetDimensions.count > 1 {
+                errors.append("View Indexes \(indexesForSetDimensions) have explicit size and proportional values set at the same time\nOnly one view in the proportional view chain can have both values present at the same time.")
+            }
+        }
+        else {
+            keyIndex = 0
+        }
+    }
+    else {
+        keyIndex = 0
+    }
+
+    let keyFlexVal = flexValues[keyIndex]!
+
+    let constraints =  (0..<views.count)
             .filter { $0 != keyIndex }
             .map {
-                return views[$0].sameDimension(orientation, views[keyIndex], multiplier: flexValues[$0] / keyFlexVal)
+                return views[$0].sameDimension(orientation, views[keyIndex], multiplier: flexValues[$0]! / keyFlexVal)
             }
+
+    return StackingResult(constraints: constraints, errors: errors)
 }
 
 
@@ -342,7 +381,6 @@ public extension UIView {
         return StackingResult(constraints: constraints)
     }
 
-
     public func stackViews(
             orientation: Orientation,
             justify: Justify,
@@ -351,8 +389,9 @@ public extension UIView {
             spacing: CGFloat = 0,
             views: [UIView],
             widths: [CGFloat?]? = nil,
+            proportionalWidths: [CGFloat?]? = nil,
             heights: [CGFloat?]? = nil,
-            flex:[CGFloat?]? = nil,
+            proportionalHeights: [CGFloat?]? = nil,
             individualAlignments: [Alignment?]? = nil,
             activateConstrains: Bool = true) -> StackingResult {
 
@@ -383,6 +422,22 @@ public extension UIView {
                 insets: insets,
                 spacing: spacing,
                 views: views)
+
+        if let proportionalWidths = proportionalWidths {
+            result += flexViews(
+                    orientation: .horizontal,
+                    views: views,
+                    flexValues: proportionalWidths,
+                    dimensions: widths)
+        }
+
+        if let proportionalHeights = proportionalHeights {
+            result += flexViews(
+                    orientation: .vertical,
+                    views: views,
+                    flexValues: proportionalHeights,
+                    dimensions: heights)
+        }
 
         result += alignViews(
                 align,

@@ -31,9 +31,9 @@ class InteractiveExampleViewController: UIViewController {
                     orientation: .vertical,
                     justify: .fill,
                     align: .fill,
-                    insets: UIEdgeInsets(top: 65, left: 0, bottom: 0, right: 0),
+                    insets: UIEdgeInsets(top: 64, left: 0, bottom: 0, right: 0),
                     views: [optionsViewController.view, stackViewController.view],
-                    heights: [210, nil])
+                    heights: [255, nil])
 
         onOptionsChanged()
     }

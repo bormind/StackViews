@@ -29,7 +29,10 @@ fileprivate func createChildView(title: String) -> UIView {
 
 }
 
-fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options: StackOptions) -> StackingResult {
+fileprivate func stackWithOptions(
+        parentView: UIView,
+        children:[UIView],
+        options: StackOptions) -> StackingResult {
 
     return parentView.stackViews(
             orientation: options.orientation,
@@ -39,7 +42,9 @@ fileprivate func stackWithOptions(parentView: UIView, children:[UIView], options
             spacing: options.spacing,
             views: children,
             widths: options.widths,
+            proportionalWidths: options.proportionalWidths,
             heights: options.heights,
+            proportionalHeights: options.proportionalHeights,
             individualAlignments: options.individualAlignments)
 
 }
@@ -66,5 +71,6 @@ class InteractiveStackViewController: UIViewController {
 
         self.stackingResult?.clearConstraints()
         self.stackingResult = stackWithOptions(parentView: self.view, children: self.children, options: options)
+
     }
 }

@@ -104,7 +104,7 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
                 align: .start,
                 spacing: 5,
                 views: labels,
-                flex: [CGFloat](repeating: 1, count: labels.count))
+                proportionalWidths: [CGFloat](repeating: 1, count: labels.count))
     }
 
     private func createPanelView(container: UIView) -> UIView {

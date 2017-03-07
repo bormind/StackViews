@@ -14,7 +14,9 @@ struct StackOptions {
     var insets: UIEdgeInsets
     var spacing: CGFloat
     var widths: [CGFloat?]
+    var proportionalWidths: [CGFloat?]
     var heights: [CGFloat?]
+    var proportionalHeights: [CGFloat?]
     var individualAlignments: [Alignment?]
 }
 
@@ -25,7 +27,9 @@ fileprivate let initialOptions = StackOptions(
         insets: UIEdgeInsets.zero,
         spacing: 0,
         widths: [100, 100, 100],
+        proportionalWidths: [nil, nil, nil],
         heights: [100, 100, 100],
+        proportionalHeights: [nil, nil, nil],
         individualAlignments: [nil, nil, nil])
 
 
@@ -33,7 +37,7 @@ fileprivate func labeledRow(_ label: String, _ ctrl: UIView) -> UIView {
     let row = UIView()
 
     let labelCtrl = UILabel()
-    labelCtrl.text = label
+    labelCtrl.text = label + ":"
     labelCtrl.backgroundColor = UIColor.barColor
 
     let _ = row.stackViews(
@@ -101,6 +105,12 @@ fileprivate let supportedAlignments: [Alignment] = [
         Alignment.end
 ]
 
+fileprivate let widthOptions: [CGFloat?] = [nil, 100, 200]
+fileprivate let heightOptions: [CGFloat?] = [nil, 25, 100]
+fileprivate let proportionalOptions: [CGFloat?] = [nil, 1, 2, 3, 5]
+
+fileprivate typealias ControlRecord = (String, UIButton, (String)->())
+
 class OptionsViewController: UIViewController {
 
     var options: StackOptions
@@ -111,8 +121,12 @@ class OptionsViewController: UIViewController {
     let alignmentButton = UIButton()
     let spacingButton = UIButton()
     let widths = UIButton()
+    let proportionalWidths = UIButton()
     let heights = UIButton()
+    let proportionalHeights = UIButton()
     let individualAlignments = UIButton()
+
+    fileprivate var controls: [ControlRecord]!
 
     var optionsChanged: (()->())?
 
@@ -127,34 +141,41 @@ class OptionsViewController: UIViewController {
 //        self.view.backgroundColor = UIColor(hex: 0x92E2E7)
         self.view.backgroundColor = UIColor.barColor
 
-        let controlsWithLabels = [("Orientation:", orientationButton),
-                                  ("Justify:", justifyButton),
-                                  ("Align:", alignmentButton),
-                                  ("Insets:", insetsButton),
-                                  ("Spacing:", spacingButton),
-                                  ("Widths:", widths),
-                                  ("Heights:", heights),
-                                  ("Individual Alignments:", individualAlignments)]
+        self.controls = [("Orientation", orientationButton, onOrientation),
+                      ("Justify", justifyButton, onJustification),
+                      ("Align", alignmentButton, onAlignment),
+                      ("Insets", insetsButton, onInsets),
+                      ("Spacing", spacingButton, onSpacing),
+                      ("Widths", widths, onWidths),
+                      ("Proportional Widths", proportionalWidths, onProportionalWidths),
+                      ("Heights", heights, onHeights),
+                      ("Proportional Heights", proportionalHeights, onProportionalHeights),
+                      ("Individual Alignments", individualAlignments, onIndividualAlignments)]
 
-        controlsWithLabels.forEach { formatButton($0.1) }
-
-        orientationButton.addTarget(self, action: #selector(onOrientation), for: .touchUpInside)
-        justifyButton.addTarget(self, action: #selector(onJustification), for: .touchUpInside)
-        insetsButton.addTarget(self, action: #selector(onInsets), for: .touchUpInside)
-        alignmentButton.addTarget(self, action: #selector(onAlignment), for: .touchUpInside)
-        spacingButton.addTarget(self, action: #selector(onSpacing), for: .touchUpInside)
-        widths.addTarget(self, action: #selector(onWidths), for: .touchUpInside)
-        heights.addTarget(self, action: #selector(onHeights), for: .touchUpInside)
-        individualAlignments.addTarget(self, action: #selector(onIndividualAlignments), for: .touchUpInside)
+        controls.forEach { formatButton($0.1) }
+        controls.forEach { $0.1.addTarget(self, action: #selector(onControl), for: .touchUpInside) }
+        
+        let controlRows = controls.map { labeledRow($0.0, $0.1) }
+        
+//        orientationButton.addTarget(self, action: #selector(onOrientation), for: .touchUpInside)
+//        justifyButton.addTarget(self, action: #selector(onJustification), for: .touchUpInside)
+//        insetsButton.addTarget(self, action: #selector(onInsets), for: .touchUpInside)
+//        alignmentButton.addTarget(self, action: #selector(onAlignment), for: .touchUpInside)
+//        spacingButton.addTarget(self, action: #selector(onSpacing), for: .touchUpInside)
+//        widths.addTarget(self, action: #selector(onWidths), for: .touchUpInside)
+//        proportionalWidths.addTarget(self, action: #selector(onProportionalWidths), for: .touchUpInside)
+//        heights.addTarget(self, action: #selector(onHeights), for: .touchUpInside)
+//        proportionalHeights.addTarget(self, action: #selector(onProportionalHeights), for: .touchUpInside)
+//        individualAlignments.addTarget(self, action: #selector(onIndividualAlignments), for: .touchUpInside)
 
         let _ = self.view.stackViews(
                 orientation: .vertical,
                 justify: .start,
                 align: .fill,
-                insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
+                insets: UIEdgeInsets(top: 5, left: 20, bottom: 5, right: 10),
                 spacing: 5,
-                views: controlsWithLabels.map(labeledRow),
-                heights: [CGFloat?](repeating: 20, count: controlsWithLabels.count))
+                views: controlRows,
+                heights: [CGFloat?](repeating: 20, count: controlRows.count))
 
         updateUI()
     }
@@ -162,29 +183,34 @@ class OptionsViewController: UIViewController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    func onOrientation() {
+    
+    func onControl(_ sender: UIControl) {
+        if let record = controls.first(where: { $0.1 == sender }) {
+            record.2(record.0)
+        }
+    }
+    
+    func onOrientation(_ title: String) {
         let items: [Orientation] = [.horizontal, .vertical]
         let currentIndex = items.index(where: { $0 == self.options.orientation }) ?? 0
         let titles = items.map(formatEnumValue)
 
-        onPickProperty("Orientation", [titles], [currentIndex]) {
+        onPickProperty(title, [titles], [currentIndex]) {
             self.options.orientation = items[$0[0]]
         }
-
     }
 
-    func onJustification() {
+    func onJustification(_ title: String) {
         let items: [Justify] = [.fill, .start, .end, .spaceBetween, .center]
         let currentIndex = items.index(where: { $0 == self.options.justify }) ?? 0
         let titles = items.map(formatEnumValue)
 
-        onPickProperty("Justify", [titles], [currentIndex]) {
+        onPickProperty(title, [titles], [currentIndex]) {
             self.options.justify = items[$0[0]]
         }
     }
 
-    func onInsets() {
+    func onInsets(_ title: String) {
         let componentItems:[CGFloat] = [0, 20]
         let items = [[CGFloat]](repeating: componentItems, count:4)
         let stringItems = [[String]](repeating: componentItems.map {"\($0)"}, count:4)
@@ -192,59 +218,79 @@ class OptionsViewController: UIViewController {
         let currentValues = [self.options.insets.top, self.options.insets.left, self.options.insets.bottom, self.options.insets.right]
         let currentIndexes = getMultiComponentIndexes(components: items, values: currentValues)
 
-        onPickProperty("Insets", stringItems, currentIndexes, ["top", "left", "bottom", "right"]) {
+        onPickProperty(title, stringItems, currentIndexes, ["top", "left", "bottom", "right"]) {
             self.options.insets = UIEdgeInsets(top: items[0][$0[0]], left: items[1][$0[1]], bottom: items[2][$0[2]], right: items[3][$0[3]])
         }
     }
 
-    func onAlignment() {
+    func onAlignment(_ title: String) {
 
         let currentIndex = supportedAlignments.index(where: { $0 ==? self.options.align }) ?? 0
         let titles = supportedAlignments.map(formatEnumValue)
 
-        onPickProperty("Alignment", [titles], [currentIndex]) {
+        onPickProperty(title, [titles], [currentIndex]) {
             self.options.align = supportedAlignments[$0[0]]
         }
     }
 
-    func onSpacing() {
+    func onSpacing(_ title: String) {
         let items: [CGFloat] = [0, 20]
         let currentIndex = items.index(where: { $0 == self.options.spacing }) ?? 0
         let titles = items.map { "\(Int($0))" }
 
-        onPickProperty("Spacing", [titles], [currentIndex]) {
+        onPickProperty(title, [titles], [currentIndex]) {
             self.options.spacing = items[$0[0]]
         }
     }
 
-    func onWidths() {
-        let items: [[CGFloat?]] = [[nil, 100, 200], [nil, 100, 200], [nil, 100, 200]]
+    func onWidths(_ title: String) {
+        let items: [[CGFloat?]] = [widthOptions, widthOptions, widthOptions]
         let stringValues = items.map(formatNumericValues)
         let currentIndexes = getMultiComponentIndexes(components: items, values: self.options.widths)
 
-        onPickProperty("Widths", stringValues, currentIndexes, viewTitles) {
+        onPickProperty(title, stringValues, currentIndexes, viewTitles) {
             self.options.widths = $0.enumerated().map { comp, ix in items[comp][ix] }
         }
 
     }
 
-    func onHeights() {
-        let items: [[CGFloat?]] = [[nil, 25, 100], [nil, 25, 100], [nil, 25, 100]]
+    func onProportionalWidths(_ title: String) {
+        let items: [[CGFloat?]] = [proportionalOptions, proportionalOptions, proportionalOptions]
+        let stringValues = items.map(formatNumericValues)
+        let currentIndexes = getMultiComponentIndexes(components: items, values: self.options.proportionalWidths)
+
+        onPickProperty(title, stringValues, currentIndexes, viewTitles) {
+            self.options.proportionalWidths = $0.enumerated().map { comp, ix in items[comp][ix] }
+        }
+    }
+
+    func onHeights(_ title: String) {
+        let items: [[CGFloat?]] = [heightOptions, heightOptions, heightOptions]
         let titles = items.map(formatNumericValues)
         let currentIndexes = getMultiComponentIndexes(components: items, values: self.options.heights)
 
-        onPickProperty("Heights", titles, currentIndexes, viewTitles) {
+        onPickProperty(title, titles, currentIndexes, viewTitles) {
             self.options.heights = $0.enumerated().map { comp, ix in items[comp][ix] }
         }
     }
 
-    func onIndividualAlignments() {
+    func onProportionalHeights(_ title: String) {
+        let items: [[CGFloat?]] = [proportionalOptions, proportionalOptions, proportionalOptions]
+        let stringValues = items.map(formatNumericValues)
+        let currentIndexes = getMultiComponentIndexes(components: items, values: self.options.proportionalHeights)
+
+        onPickProperty(title, stringValues, currentIndexes, viewTitles) {
+            self.options.proportionalHeights = $0.enumerated().map { comp, ix in items[comp][ix] }
+        }
+    }
+
+    func onIndividualAlignments(_ title: String) {
         let individualAlignments: [Alignment?] = [nil] + supportedAlignments
         let items: [[Alignment?]] = [individualAlignments, individualAlignments, individualAlignments]
         let titles = items.map { $0.map(formatEnumValue) }
         let currentIndexes = getMultiComponentIndexes(components: items, values: self.options.individualAlignments)
 
-        onPickProperty("Individual Alignments", titles, currentIndexes, viewTitles) {
+        onPickProperty(title, titles, currentIndexes, viewTitles) {
             self.options.individualAlignments = $0.enumerated().map { comp, ix in items[comp][ix] }
         }
     }
@@ -266,11 +312,12 @@ class OptionsViewController: UIViewController {
         insetsButton.setTitle(formatInsets(self.options.insets), for: .normal)
         spacingButton.setTitle("\(Int(self.options.spacing))", for: .normal)
         widths.setTitle(formatNumericArray(self.options.widths), for: .normal)
+        proportionalWidths.setTitle(formatNumericArray(self.options.proportionalWidths), for: .normal)
         heights.setTitle(formatNumericArray(self.options.heights), for: .normal)
-
+        proportionalHeights.setTitle(formatNumericArray(self.options.proportionalHeights), for: .normal)
+        
         let alignments = self.options.individualAlignments.map(formatEnumValue)
         individualAlignments.setTitle("[\(alignments.joined(separator: ", "))]", for: .normal)
-
     }
 
 }
