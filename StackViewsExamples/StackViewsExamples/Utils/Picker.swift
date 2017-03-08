@@ -72,7 +72,9 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         let panelView = createPanelView(container: self.view)
 
         //Title bar
-        let _ = panelView.stackViews(orientation: .horizontal,
+        let _ = stackViews(
+                    container: panelView,
+                    orientation: .horizontal,
                     justify: .fill,
                     align: .start,
                     insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
@@ -81,7 +83,8 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
                     heights: [25, 25, 25])
 
         //picker
-        let _ = panelView.stackViews(
+        let _ = stackViews(
+                    container: panelView,
                     orientation: .horizontal,
                     justify: .fill,
                     align: .fill,
@@ -98,7 +101,8 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             return label
         }
 
-        _ = picker.stackViews(
+        _ = stackViews(
+                container: picker,
                 orientation: .horizontal,
                 justify: .fill,
                 align: .start,
@@ -111,7 +115,8 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         let panel = UIView()
         panel.backgroundColor = UIColor.barColor
 
-        let _ = container.stackViews(
+        let _ = stackViews(
+                    container: container,
                     orientation: .horizontal,
                     justify: .fill,
                     align: .center,

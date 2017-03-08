@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		97BC71211E2D502A00D1E56B /* StackViews.h in Headers */ = {isa = PBXBuildFile; fileRef = 97BC71131E2D502A00D1E56B /* StackViews.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		97BC712B1E2D50C600D1E56B /* StackViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97BC712A1E2D50C600D1E56B /* StackViews.swift */; };
+		AD8C83CA40B69EBCB54DB438 /* FlexViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C8412B152B83A49DA620D /* FlexViews.swift */; };
+		AD8C83D794D60E8FBE8C8834 /* UIViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C8E2D64A92E81665393C5 /* UIViewExtensions.swift */; };
+		AD8C8C186F281EEE981DABD5 /* UIEdgeInsetsExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C832F80A672B53559A41E /* UIEdgeInsetsExtensions.swift */; };
+		AD8C8DCC69ECB65C2A54E33D /* Stacker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C86292B0DBB7EEA1A6230 /* Stacker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -16,6 +20,10 @@
 		97BC71131E2D502A00D1E56B /* StackViews.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackViews.h; sourceTree = "<group>"; };
 		97BC71141E2D502A00D1E56B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		97BC712A1E2D50C600D1E56B /* StackViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StackViews.swift; sourceTree = "<group>"; };
+		AD8C832F80A672B53559A41E /* UIEdgeInsetsExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIEdgeInsetsExtensions.swift; sourceTree = "<group>"; };
+		AD8C8412B152B83A49DA620D /* FlexViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlexViews.swift; sourceTree = "<group>"; };
+		AD8C86292B0DBB7EEA1A6230 /* Stacker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stacker.swift; sourceTree = "<group>"; };
+		AD8C8E2D64A92E81665393C5 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +59,10 @@
 				97BC71131E2D502A00D1E56B /* StackViews.h */,
 				97BC71141E2D502A00D1E56B /* Info.plist */,
 				97BC712A1E2D50C600D1E56B /* StackViews.swift */,
+				AD8C8E2D64A92E81665393C5 /* UIViewExtensions.swift */,
+				AD8C832F80A672B53559A41E /* UIEdgeInsetsExtensions.swift */,
+				AD8C86292B0DBB7EEA1A6230 /* Stacker.swift */,
+				AD8C8412B152B83A49DA620D /* FlexViews.swift */,
 			);
 			path = StackViews;
 			sourceTree = "<group>";
@@ -137,6 +149,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				97BC712B1E2D50C600D1E56B /* StackViews.swift in Sources */,
+				AD8C83D794D60E8FBE8C8834 /* UIViewExtensions.swift in Sources */,
+				AD8C8C186F281EEE981DABD5 /* UIEdgeInsetsExtensions.swift in Sources */,
+				AD8C8DCC69ECB65C2A54E33D /* Stacker.swift in Sources */,
+				AD8C83CA40B69EBCB54DB438 /* FlexViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -34,20 +34,18 @@ fileprivate let initialOptions = StackOptions(
 
 
 fileprivate func labeledRow(_ label: String, _ ctrl: UIView) -> UIView {
-    let row = UIView()
 
     let labelCtrl = UILabel()
     labelCtrl.text = label + ":"
     labelCtrl.backgroundColor = UIColor.barColor
 
-    let _ = row.stackViews(
-            orientation: .horizontal,
-            justify: .fill,
-            align: .center,
-            views: [labelCtrl, ctrl],
-            widths: [200, nil])
+    return  stackViews(
+                orientation: .horizontal,
+                justify: .fill,
+                align: .center,
+                views: [labelCtrl, ctrl],
+                widths: [200, nil]).container
 
-    return row
 }
 
 fileprivate func formatInsets(_ insets: UIEdgeInsets) -> String {
@@ -156,26 +154,16 @@ class OptionsViewController: UIViewController {
         controls.forEach { $0.1.addTarget(self, action: #selector(onControl), for: .touchUpInside) }
         
         let controlRows = controls.map { labeledRow($0.0, $0.1) }
-        
-//        orientationButton.addTarget(self, action: #selector(onOrientation), for: .touchUpInside)
-//        justifyButton.addTarget(self, action: #selector(onJustification), for: .touchUpInside)
-//        insetsButton.addTarget(self, action: #selector(onInsets), for: .touchUpInside)
-//        alignmentButton.addTarget(self, action: #selector(onAlignment), for: .touchUpInside)
-//        spacingButton.addTarget(self, action: #selector(onSpacing), for: .touchUpInside)
-//        widths.addTarget(self, action: #selector(onWidths), for: .touchUpInside)
-//        proportionalWidths.addTarget(self, action: #selector(onProportionalWidths), for: .touchUpInside)
-//        heights.addTarget(self, action: #selector(onHeights), for: .touchUpInside)
-//        proportionalHeights.addTarget(self, action: #selector(onProportionalHeights), for: .touchUpInside)
-//        individualAlignments.addTarget(self, action: #selector(onIndividualAlignments), for: .touchUpInside)
 
-        let _ = self.view.stackViews(
-                orientation: .vertical,
-                justify: .start,
-                align: .fill,
-                insets: UIEdgeInsets(top: 5, left: 20, bottom: 5, right: 10),
-                spacing: 5,
-                views: controlRows,
-                heights: [CGFloat?](repeating: 20, count: controlRows.count))
+        let _ = stackViews(
+                    container: self.view,
+                    orientation: .vertical,
+                    justify: .start,
+                    align: .fill,
+                    insets: UIEdgeInsets(top: 5, left: 20, bottom: 5, right: 10),
+                    spacing: 5,
+                    views: controlRows,
+                    heights: [CGFloat?](repeating: 20, count: controlRows.count))
 
         updateUI()
     }

@@ -27,7 +27,8 @@ class InteractiveExampleViewController: UIViewController {
 
         optionsViewController.optionsChanged = self.onOptionsChanged
 
-        let _ = self.view.stackViews(
+        let _ = stackViews(
+                    container: self.view,
                     orientation: .vertical,
                     justify: .fill,
                     align: .fill,
