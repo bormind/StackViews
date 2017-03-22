@@ -11,7 +11,7 @@ struct StackOptions {
     var orientation: Orientation
     var justify: Justify
     var align: Alignment
-    var insets: UIEdgeInsets
+    var insets: Insets
     var spacing: CGFloat
     var widths: [CGFloat?]
     var proportionalWidths: [CGFloat?]
@@ -24,7 +24,7 @@ fileprivate let initialOptions = StackOptions(
         orientation: .vertical,
         justify: .center,
         align: .center,
-        insets: UIEdgeInsets.zero,
+        insets: Insets.zero,
         spacing: 0,
         widths: [100, 100, 100],
         proportionalWidths: [nil, nil, nil],
@@ -48,7 +48,7 @@ fileprivate func labeledRow(_ label: String, _ ctrl: UIView) -> UIView {
 
 }
 
-fileprivate func formatInsets(_ insets: UIEdgeInsets) -> String {
+fileprivate func formatInsets(_ insets: Insets) -> String {
     return zip(
             ["t:", "l:", "b:", "r:"],
             [Int(insets.top), Int(insets.left), Int(insets.bottom), Int(insets.right)] )
@@ -160,7 +160,7 @@ class OptionsViewController: UIViewController {
                     orientation: .vertical,
                     justify: .start,
                     align: .fill,
-                    insets: UIEdgeInsets(top: 5, left: 20, bottom: 5, right: 10),
+                    insets: Insets(top: 5, left: 20, bottom: 5, right: 10),
                     spacing: 5,
                     views: controlRows,
                     heights: [CGFloat?](repeating: 20, count: controlRows.count))
@@ -207,7 +207,7 @@ class OptionsViewController: UIViewController {
         let currentIndexes = getMultiComponentIndexes(components: items, values: currentValues)
 
         onPickProperty(title, stringItems, currentIndexes, ["top", "left", "bottom", "right"]) {
-            self.options.insets = UIEdgeInsets(top: items[0][$0[0]], left: items[1][$0[1]], bottom: items[2][$0[2]], right: items[3][$0[3]])
+            self.options.insets = Insets(top: items[0][$0[0]], left: items[1][$0[1]], bottom: items[2][$0[2]], right: items[3][$0[3]])
         }
     }
 

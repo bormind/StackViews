@@ -32,7 +32,7 @@ class InteractiveExampleViewController: UIViewController {
                     orientation: .vertical,
                     justify: .fill,
                     align: .fill,
-                    insets: UIEdgeInsets(top: 64, left: 0, bottom: 0, right: 0),
+                    insets: Insets(top: 64),
                     views: [optionsViewController.view, stackViewController.view],
                     heights: [255, nil])
 

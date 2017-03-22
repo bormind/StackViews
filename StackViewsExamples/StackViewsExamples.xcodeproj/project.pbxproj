@@ -14,6 +14,7 @@
 		97B7500D1E3D8A6B00AC746B /* StackViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97B7500C1E3D8A6B00AC746B /* StackViews.framework */; };
 		AD8C801697B040F26E99616D /* OptionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C8F1059DDB3724DAFF335 /* OptionsViewController.swift */; };
 		AD8C807176664A82B74BF7EE /* InteractiveStackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C869530A3F369638A9079 /* InteractiveStackViewController.swift */; };
+		AD8C849BBAEA21A85CFA6081 /* DocsExampleFooterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C87378038A23830F518F2 /* DocsExampleFooterViewController.swift */; };
 		AD8C85C004FC702DE07F6B0A /* Picker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C8A62BC2DB373B90FAA36 /* Picker.swift */; };
 		AD8C867116CFFFD6DFFE3608 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C84637050A3C6833EA307 /* MenuViewController.swift */; };
 		AD8C8681E72B8D972958CE85 /* UIEdgeInsetsExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C8AEF50F0B01418A0336E /* UIEdgeInsetsExtensions.swift */; };
@@ -40,6 +41,7 @@
 		AD8C84637050A3C6833EA307 /* MenuViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		AD8C869530A3F369638A9079 /* InteractiveStackViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveStackViewController.swift; sourceTree = "<group>"; };
 		AD8C870B6567607F5932736D /* MenuTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuTableCell.swift; sourceTree = "<group>"; };
+		AD8C87378038A23830F518F2 /* DocsExampleFooterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocsExampleFooterViewController.swift; sourceTree = "<group>"; };
 		AD8C8A62BC2DB373B90FAA36 /* Picker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Picker.swift; sourceTree = "<group>"; };
 		AD8C8AEF50F0B01418A0336E /* UIEdgeInsetsExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIEdgeInsetsExtensions.swift; sourceTree = "<group>"; };
 		AD8C8B4C0317D86554859F6B /* DocsExampleHeaderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocsExampleHeaderViewController.swift; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 			children = (
 				AD8C82BF595F0B1C3D36CE75 /* DocsExampleViewController.swift */,
 				AD8C8B4C0317D86554859F6B /* DocsExampleHeaderViewController.swift */,
+				AD8C87378038A23830F518F2 /* DocsExampleFooterViewController.swift */,
 			);
 			path = DocsStackViewExapmle;
 			sourceTree = "<group>";
@@ -222,6 +225,7 @@
 				AD8C807176664A82B74BF7EE /* InteractiveStackViewController.swift in Sources */,
 				AD8C8F45CF6343DDCE7D98D3 /* DocsExampleViewController.swift in Sources */,
 				AD8C87B4B671ACD2BE1D3E64 /* DocsExampleHeaderViewController.swift in Sources */,
+				AD8C849BBAEA21A85CFA6081 /* DocsExampleFooterViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

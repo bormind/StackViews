@@ -77,7 +77,7 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
                     orientation: .horizontal,
                     justify: .fill,
                     align: .start,
-                    insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
+                    insets: Insets(horizontal: 5, vertical: 5),
                     views: [leftSpacer, titleLabel, doneButton],
                     widths: [50, nil, 50],
                     heights: [25, 25, 25])
@@ -88,7 +88,7 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
                     orientation: .horizontal,
                     justify: .fill,
                     align: .fill,
-                    insets: UIEdgeInsets(top: 40, left: 0, bottom: 0, right: 0),
+                    insets: Insets(top: 40),
                     views: [picker])
     }
 
@@ -120,7 +120,7 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
                     orientation: .horizontal,
                     justify: .fill,
                     align: .center,
-                    insets: UIEdgeInsets(horizontal: 20),
+                    insets: Insets(horizontal: 20),
                     views: [panel],
                     heights: [250])
 

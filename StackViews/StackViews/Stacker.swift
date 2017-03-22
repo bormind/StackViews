@@ -8,13 +8,6 @@ import Foundation
 
 internal let propertyCountMismatchMessage = "Child view properties should be provided for each view in the array, nil can be used to indicate use of container wide defaults"
 
-internal enum SnappingOptions {
-    case noSnap
-    case snapToStart
-    case snapToEnd
-    case snapToBoth
-}
-
 
 internal func createView() -> UIView {
     let view = UIView()
@@ -35,75 +28,97 @@ internal func meetTheParent(_ container: UIView) -> (UIView) -> () {
     }
 }
 
+internal enum SnapOption {
+    case start
+    case end
+    case center
+
+}
+
+
 
 internal struct Stacker {
     let view: UIView
     let orientation: Orientation
-    let insets: UIEdgeInsets
+    let insets: Insets
 }
 
 extension Stacker {
-    func chainViews(
-            _ snappingOptions: SnappingOptions,
-            _ spacing: CGFloat,
-            _ views: [UIView]) -> [NSLayoutConstraint] {
 
-        if views.isEmpty {
-            return []
+    func snapToParent(_ orientation: Orientation, _ view: UIView, _ snapOption: SnapOption) -> [NSLayoutConstraint] {
+        return snapToParent(orientation, [view], [snapOption])
+    }
+
+    func snapToParent(_ orientation: Orientation, _ views: [UIView], _ snapOptions: [SnapOption]) -> [NSLayoutConstraint] {
+
+        func snapOptionConstant(_ snapOption: SnapOption) -> CGFloat {
+            switch (orientation, snapOption) {
+            case (.vertical, .start): return insets.top
+            case (.horizontal, .start): return insets.left
+            case (.vertical, .end): return -insets.bottom
+            case (.horizontal, .end): return -insets.right
+            case (.horizontal, .center): return 0
+            case (.vertical, .center): return 0
+            }
         }
 
-        var constraints:[NSLayoutConstraint] = []
+        return views.flatMap { view in
+            snapOptions.map { view.snapTo(orientation, self.view, $0, snapOptionConstant($0)) }
 
-        constraints += (0..<views.count - 1).reduce([]) { acc, i in
+        }
+    }
+
+    func chainViews(_ views: [UIView], _ spacing: CGFloat) -> [NSLayoutConstraint] {
+        return (0..<views.count - 1).reduce([]) { acc, i in
             return acc + [views[i + 1].chainTo(orientation, views[i], spacing)]
         }
-
-        switch snappingOptions {
-        case .snapToStart:
-            constraints.append(views[0].snapToStart(orientation, self.view, insets.start(orientation)))
-        case .snapToEnd:
-            constraints.append(views[views.count - 1].snapToEnd(orientation, self.view, -insets.end(orientation)))
-        case .snapToBoth:
-            constraints.append(views[0].snapToStart(orientation, self.view, insets.start(orientation)))
-            constraints.append(views[views.count - 1].snapToEnd(orientation, self.view, -insets.end(orientation)))
-        case .noSnap:
-            break
-        }
-
-        return constraints
     }
 
     func justifyViews( justify: Justify,
                         spacing: CGFloat,
                         views: [UIView]) -> ([NSLayoutConstraint], [UIView]) {
 
+        guard !views.isEmpty else {
+            return ([], [])
+        }
+
         var constraints: [NSLayoutConstraint] = []
         var generatedViews: [UIView] = []
 
         switch justify {
         case .start:
-            constraints += chainViews(.snapToStart, spacing, views)
+            constraints += snapToParent(self.orientation, views.first!, .start)
+            constraints += chainViews(views, spacing)
         case .fill:
-            constraints += chainViews(.snapToBoth, spacing, views)
+            constraints += snapToParent(self.orientation, views.first!, .start)
+            constraints += chainViews(views, spacing)
+            constraints += snapToParent(self.orientation, views.last!, .end)
         case .end:
-            constraints += chainViews(.snapToEnd, spacing, views)
+            constraints += chainViews(views, spacing)
+            constraints += snapToParent(self.orientation, views.last!, .end)
         case .center:
             if views.count == 1 {
-                constraints.append(views[0].snapToCenter(orientation, self.view))
+                constraints += snapToParent(self.orientation, views.first!, .center)
             }
             else {
                 let (allViews, spacers) = addViewsAround(views)
                 generatedViews += spacers
                 constraints += arrangeSpacerViews(spacers)
-                constraints += chainViews(.snapToBoth, spacing, allViews)
+                constraints += snapToParent(self.orientation, allViews.first!, .start)
+                constraints += chainViews(allViews, spacing)
+                constraints += snapToParent(self.orientation, allViews.last!, .end)
             }
         case .spaceBetween:
+            constraints += snapToParent(self.orientation, views.first!, .start)
+            constraints += snapToParent(self.orientation, views.last!, .end)
+
             if views.count > 1 {
                 let (allViews, spacers) = addViewsBetween(views)
                 generatedViews += spacers
                 constraints += arrangeSpacerViews(spacers)
-                constraints += chainViews(.snapToBoth, spacing, allViews)
+                constraints += chainViews(allViews, 0)
             }
+
         }
 
         return (constraints, generatedViews)
@@ -125,19 +140,15 @@ extension Stacker {
 
     func alignView(_ view: UIView, _ alignment: Alignment) -> [NSLayoutConstraint] {
 
-        let flippedOrientation = self.orientation.flip()
         switch alignment {
         case .start:
-            return [view.snapToStart(flippedOrientation, self.view, self.insets.start(flippedOrientation))]
+            return snapToParent(self.orientation.flip(), view, .start)
         case .center:
-            return [view.snapToCenter(flippedOrientation, self.view)]
+            return snapToParent(self.orientation.flip(), view, .center)
         case .end:
-            return [view.snapToEnd(flippedOrientation, self.view, -self.insets.end(flippedOrientation))]
+            return snapToParent(self.orientation.flip(), view, .end)
         case .fill:
-            return [
-                    view.snapToStart(flippedOrientation, self.view, self.insets.start(flippedOrientation)),
-                    view.snapToEnd(flippedOrientation, self.view, -self.insets.end(flippedOrientation))
-            ]
+            return snapToParent(self.orientation.flip(), [view], [.start, .end])
         }
 
     }
@@ -153,7 +164,7 @@ extension Stacker {
 
     func alignSpacerViews(_ views: [UIView]) -> [NSLayoutConstraint] {
         return views.map { $0.setDimension(self.orientation.flip(), 10) }
-                + views.map { $0.snapToCenter(self.orientation.flip(), self.view) }
+                + views.map { $0.snapTo(self.orientation.flip(), self.view, .center, 0) }
 
     }
 

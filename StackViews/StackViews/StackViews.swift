@@ -61,11 +61,40 @@ public extension StackingResult {
     }
 }
 
+public struct Insets {
+    public let top: CGFloat
+    public let left: CGFloat
+    public let bottom: CGFloat
+    public let right: CGFloat
+
+    public static var zero: Insets {
+        return Insets()
+    }
+
+    public init(top: CGFloat = 0, left: CGFloat = 0, bottom: CGFloat = 0, right: CGFloat = 0) {
+        self.top = top
+        self.left = left
+        self.bottom = bottom
+        self.right = right
+    }
+
+    public init(horizontal: CGFloat, vertical: CGFloat) {
+        self.init(top: vertical, left: horizontal, bottom: vertical, right: horizontal)
+    }
+
+    public init(horizontal: CGFloat) {
+        self.init(top: 0, left: horizontal, bottom: 0, right: horizontal)
+    }
+
+    public init(vertical: CGFloat) {
+       self.init(top: vertical, left: 0, bottom: vertical, right: 0)
+    }
+}
 
 public func justifyViews( container: UIView? = nil,
                            justify: Justify,
                            orientation: Orientation,
-                           insets: UIEdgeInsets = UIEdgeInsets.zero,
+                           insets: Insets = Insets.zero,
                            spacing: CGFloat = 0,
                            views: [UIView]) -> StackingResult {
 
@@ -85,7 +114,7 @@ public func alignViews(
         container: UIView,
         align: Alignment,
         orientation: Orientation,
-        insets: UIEdgeInsets = UIEdgeInsets.zero,
+        insets: Insets = Insets.zero,
         views: [UIView],
         individualAlignments: [Alignment?]? = nil) -> StackingResult {
 
@@ -106,7 +135,7 @@ public func stackViews(
         orientation: Orientation,
         justify: Justify,
         align: Alignment,
-        insets: UIEdgeInsets = UIEdgeInsets.zero,
+        insets: Insets = Insets.zero,
         spacing: CGFloat = 0,
         views: [UIView],
         widths: [CGFloat?]? = nil,
@@ -184,6 +213,24 @@ public func stackViews(
     }
 
     return StackingResult(container: stacker.view, constraints: constraints, generatedViews: generatedViews)
+}
+
+//Helper function do deal with controllers guides
+public func embedView(_ view: UIView,
+                      inViewController: UIViewController,
+                      insets: Insets = Insets.zero) {
+
+    inViewController.view.addSubview(view)
+
+    view.translatesAutoresizingMaskIntoConstraints = false
+
+    //Constraint container to edges
+    NSLayoutConstraint.activate([
+            view.topAnchor.constraint(equalTo: inViewController.topLayoutGuide.bottomAnchor, constant: insets.top),
+            view.leftAnchor.constraint(equalTo: inViewController.view.leftAnchor, constant: insets.left),
+            view.bottomAnchor.constraint(equalTo: inViewController.bottomLayoutGuide.topAnchor, constant: -insets.bottom),
+            view.rightAnchor.constraint(equalTo: inViewController.view.rightAnchor, constant: -insets.right)
+    ])
 }
 
 
