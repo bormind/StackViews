@@ -22,7 +22,7 @@ class DocsExampleHeaderViewController: UIViewController {
         icon.widthAnchor.constraint(equalTo: icon.heightAnchor, multiplier: 1).isActive = true
 
         //Set border for better visibility
-        [firstName, middleName, lastName].map { $0.borderStyle = .roundedRect }
+        [firstName, middleName, lastName].forEach { $0.borderStyle = .roundedRect }
 
         //Stack Fields vertically
         let fieldsView = stackViews(
@@ -38,7 +38,7 @@ class DocsExampleHeaderViewController: UIViewController {
             .container
 
         //Stack image and fields horizontally
-        stackViews(
+        _ = stackViews(
                 container: self.view,
                 orientation: .horizontal,
                 justify: .fill,

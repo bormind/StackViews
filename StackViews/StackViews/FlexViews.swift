@@ -41,7 +41,7 @@ internal func flexViews(orientation: Orientation,
 
     let keyFlexVal = flexValues[keyIndex]!
 
-    let constraints =  (0..<views.count)
+    let constraints =  flexIndexes
             .filter { $0 != keyIndex }
             .map {
                 return views[$0].sameDimension(orientation, views[keyIndex], multiplier: flexValues[$0]! / keyFlexVal)

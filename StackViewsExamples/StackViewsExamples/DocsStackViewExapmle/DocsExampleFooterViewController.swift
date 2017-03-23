@@ -31,7 +31,7 @@ class DocsExampleFooterViewController: UIViewController {
 
         [saveButton, cancelButton, clearButton].forEach(formatButton)
 
-        stackViews(
+        _ = stackViews(
                 container: self.view,
                 orientation: .horizontal,
                 justify: .center,

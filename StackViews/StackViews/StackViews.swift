@@ -119,7 +119,7 @@ public func alignViews(
         individualAlignments: [Alignment?]? = nil) -> StackingResult {
 
     let stacker = Stacker(
-            view: container ?? createView(),
+            view: container,
             orientation: orientation,
             insets: insets)
 

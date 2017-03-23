@@ -109,6 +109,15 @@ fileprivate let proportionalOptions: [CGFloat?] = [nil, 1, 2, 3, 5]
 
 fileprivate typealias ControlRecord = (String, UIButton, (String)->())
 
+fileprivate func areEqual<T: Equatable>(_ lhs: T?, _ rhs: T?) -> Bool {
+    if let lhs = lhs, let rhs = rhs {
+        return lhs == rhs
+    }
+    else {
+        return lhs == nil && rhs == nil
+    }
+}
+
 class OptionsViewController: UIViewController {
 
     var options: StackOptions
@@ -213,7 +222,7 @@ class OptionsViewController: UIViewController {
 
     func onAlignment(_ title: String) {
 
-        let currentIndex = supportedAlignments.index(where: { $0 ==? self.options.align }) ?? 0
+        let currentIndex = supportedAlignments.index(where: { areEqual($0, self.options.align) }) ?? 0
         let titles = supportedAlignments.map(formatEnumValue)
 
         onPickProperty(title, [titles], [currentIndex]) {

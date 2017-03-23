@@ -19,27 +19,37 @@ fileprivate struct MenuItem {
     }
 }
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class MenuViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
-    @IBOutlet weak var tableView: UITableView!
+    let tableView = UITableView()
 
     let tableCellId = "TableCell"
 
-    fileprivate let examples: [MenuItem] = [
-            MenuItem("Interactive Example", InteractiveExampleViewController.self),
-            MenuItem("UIStackView Docs Example", DocsExampleViewController.self)
-    ]
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        
+        self.view.backgroundColor = UIColor.white
+        self.automaticallyAdjustsScrollViewInsets = false
+        
+        embedView(tableView, inViewController: self)
 
         tableView.register(MenuTableCell.self, forCellReuseIdentifier: tableCellId)
 
         tableView.delegate = self
         tableView.dataSource = self
-        
-        // Do any additional setup after loading the view, typically from a nib.
+
+        tableView.reloadData()
     }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    fileprivate let examples: [MenuItem] = [
+            MenuItem("Interactive Example", InteractiveExampleViewController.self),
+            MenuItem("UIStackView Docs Example", DocsExampleViewController.self)
+    ]
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
