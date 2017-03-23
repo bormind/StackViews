@@ -14,7 +14,7 @@ Bottom line - one function call includes all the aspects of constraining childre
 ## Example
 
 Fragment that generates this form header:<br>
-<img src="/images/form_header.png" height="100px">
+<img src="./images/form_header.png" height="100px">
 ```Swift
     let image = UIImageView(image: UIImage(named: "PersonProfile"))
     let firstName = UITextField()
