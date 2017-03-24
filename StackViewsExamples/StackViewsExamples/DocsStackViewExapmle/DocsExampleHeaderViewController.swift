@@ -28,8 +28,9 @@ class DocsExampleHeaderViewController: UIViewController {
         //Stack Fields vertically
         let fieldsStackView = stackViews(
                 orientation: .vertical,
-                justify: .spaceBetween,
+                justify: .fill,
                 align: .fill,
+                spacing: 10,
                 views: [
                         applyLabel("First Name", ofWidth: 110, toField: firstName),
                         applyLabel("Middle Name", ofWidth: 110, toField: middleName),
@@ -46,8 +47,7 @@ class DocsExampleHeaderViewController: UIViewController {
                 align: .fill,
                 insets: Insets(horizontal: 5, vertical: 5),
                 spacing: 10,
-                views: [image, fieldsStackView],
-                widths: [100, nil])
+                views: [image, fieldsStackView])
 
         //set image view to be square
         image.widthAnchor.constraint(equalTo: image.heightAnchor, multiplier: 1).isActive = true

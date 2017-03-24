@@ -50,7 +50,7 @@ class DocsExampleFooterViewController: UIViewController {
 
     private func formatButton(_ button: UIButton) {
         button.setTitleColor(UIColor.blue, for: .normal)
-        button.layer.borderWidth = 2
-        button.layer.borderColor = UIColor.lightGray.cgColor
+//        button.layer.borderWidth = 2
+//        button.layer.borderColor = UIColor.lightGray.cgColor
     }
 }

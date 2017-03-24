@@ -89,6 +89,18 @@ public struct Insets {
     public init(vertical: CGFloat) {
        self.init(top: vertical, left: 0, bottom: vertical, right: 0)
     }
+
+    public var leading: CGFloat {
+        return UIApplication.shared.userInterfaceLayoutDirection == UIUserInterfaceLayoutDirection.leftToRight
+                ? self.left
+                : self.right
+    }
+
+    public var trailing: CGFloat {
+        return UIApplication.shared.userInterfaceLayoutDirection == UIUserInterfaceLayoutDirection.leftToRight
+                ? self.right
+                : self.left
+    }
 }
 
 public func justifyViews( container: UIView? = nil,
@@ -130,6 +142,25 @@ public func alignViews(
     return StackingResult(container: stacker.view, constraints: constraints)
 }
 
+/**
+    Generates all necessary constraints that arrange provided views in the single stack horizontally or vertically
+
+    - Parameters:
+            - container: Container view that acts as a stack panel.
+            If view is not provided a new view will be created and returned as a part of the StackingResult structure
+            - orientation: defines the stacking axes as horizontal or vertical.
+            - justify: describes the stacking option along the stacking axis.
+            - align: describes the stacking option across the stacking axes for all views.
+            Can be overwritten for specific views by the individualAlignments parameter.
+            - insets: specify insets applied to the edges of the container view.
+            (Gap between the container view edges and it's children) Default = 0
+            - spacing: spacing between neighboring views along the stacking axis. Default = 0
+            - views: array of view that should be arranged (stacked) inside the container view
+            - withs:
+
+    - Returns: A beautiful, brand-new bicycle, custom built
+      just for you.
+*/
 public func stackViews(
         container: UIView? = nil,
         orientation: Orientation,

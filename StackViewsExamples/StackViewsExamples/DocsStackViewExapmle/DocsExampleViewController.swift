@@ -19,7 +19,7 @@ class DocsExampleViewController: UIViewController {
     init() {
         super.init(nibName: nil, bundle: nil)
 
-//        self.edgesForExtendedLayout = []
+        textView.text = "Notes:"
 
         self.view.backgroundColor = UIColor.white
         textView.backgroundColor = UIColor.gray
