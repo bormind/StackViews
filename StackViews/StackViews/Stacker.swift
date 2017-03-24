@@ -45,28 +45,7 @@ internal struct Stacker {
 
 extension Stacker {
 
-    func snapToParent(_ orientation: Orientation, _ view: UIView, _ snapOption: SnapOption) -> [NSLayoutConstraint] {
-        return snapToParent(orientation, [view], [snapOption])
-    }
 
-    func snapToParent(_ orientation: Orientation, _ views: [UIView], _ snapOptions: [SnapOption]) -> [NSLayoutConstraint] {
-
-        func snapOptionConstant(_ snapOption: SnapOption) -> CGFloat {
-            switch (orientation, snapOption) {
-            case (.vertical, .start): return insets.top
-            case (.horizontal, .start): return insets.left
-            case (.vertical, .end): return -insets.bottom
-            case (.horizontal, .end): return -insets.right
-            case (.horizontal, .center): return 0
-            case (.vertical, .center): return 0
-            }
-        }
-
-        return views.flatMap { view in
-            snapOptions.map { view.snapTo(orientation, self.view, $0, snapOptionConstant($0)) }
-
-        }
-    }
 
     func chainViews(_ views: [UIView], _ spacing: CGFloat) -> [NSLayoutConstraint] {
         return (0..<views.count - 1).reduce([]) { acc, i in
@@ -124,34 +103,7 @@ extension Stacker {
         return (constraints, generatedViews)
     }
 
-    func alignViews(align: Alignment,
-                    views: [UIView],
-                    individualAlignments: [Alignment?]? = nil) -> [NSLayoutConstraint] {
 
-        assert(individualAlignments == nil || individualAlignments!.count == views.count, propertyCountMismatchMessage)
-
-        let constraints = (0..<views.count).reduce([]) { acc, i in
-            return acc + self.alignView(views[i], individualAlignments?[i] ?? align)
-        }
-
-        return constraints
-    }
-
-
-    func alignView(_ view: UIView, _ alignment: Alignment) -> [NSLayoutConstraint] {
-
-        switch alignment {
-        case .start:
-            return snapToParent(self.orientation.flip(), view, .start)
-        case .center:
-            return snapToParent(self.orientation.flip(), view, .center)
-        case .end:
-            return snapToParent(self.orientation.flip(), view, .end)
-        case .fill:
-            return snapToParent(self.orientation.flip(), [view], [.start, .end])
-        }
-
-    }
 
     func addViewsAround(_ views: [UIView]) -> ([UIView], [UIView]) {
         let outerViews = [createView(), createView()]
