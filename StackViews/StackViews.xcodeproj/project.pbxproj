@@ -10,7 +10,6 @@
 		97BC71211E2D502A00D1E56B /* StackViews.h in Headers */ = {isa = PBXBuildFile; fileRef = 97BC71131E2D502A00D1E56B /* StackViews.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		97BC712B1E2D50C600D1E56B /* StackViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97BC712A1E2D50C600D1E56B /* StackViews.swift */; };
 		AD8C83CA40B69EBCB54DB438 /* FlexViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C8412B152B83A49DA620D /* FlexViews.swift */; };
-		AD8C843B61C88557B7C2FB61 /* SnapToParent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C88F86E984E43B8BDDEDF /* SnapToParent.swift */; };
 		AD8C849DF34BA91A7D205F8E /* AlignViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C870F4C5F85917136144C /* AlignViews.swift */; };
 		AD8C890CB4B2F5E0B92A98FB /* JustifyViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C895A805F4C2FFA62A87C /* JustifyViews.swift */; };
 		AD8C8AE3580BA7833E5FA300 /* Constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8C8BBCC4AECFC933A058FC /* Constraints.swift */; };
@@ -25,7 +24,6 @@
 		AD8C8412B152B83A49DA620D /* FlexViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlexViews.swift; sourceTree = "<group>"; };
 		AD8C85F313ADE1F76ABF3E57 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		AD8C870F4C5F85917136144C /* AlignViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlignViews.swift; sourceTree = "<group>"; };
-		AD8C88F86E984E43B8BDDEDF /* SnapToParent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SnapToParent.swift; sourceTree = "<group>"; };
 		AD8C895A805F4C2FFA62A87C /* JustifyViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JustifyViews.swift; sourceTree = "<group>"; };
 		AD8C8BBCC4AECFC933A058FC /* Constraints.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constraints.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -65,7 +63,6 @@
 				97BC712A1E2D50C600D1E56B /* StackViews.swift */,
 				AD8C8412B152B83A49DA620D /* FlexViews.swift */,
 				AD8C870F4C5F85917136144C /* AlignViews.swift */,
-				AD8C88F86E984E43B8BDDEDF /* SnapToParent.swift */,
 				AD8C8BBCC4AECFC933A058FC /* Constraints.swift */,
 				AD8C85F313ADE1F76ABF3E57 /* Helpers.swift */,
 				AD8C895A805F4C2FFA62A87C /* JustifyViews.swift */,
@@ -157,7 +154,6 @@
 				97BC712B1E2D50C600D1E56B /* StackViews.swift in Sources */,
 				AD8C83CA40B69EBCB54DB438 /* FlexViews.swift in Sources */,
 				AD8C849DF34BA91A7D205F8E /* AlignViews.swift in Sources */,
-				AD8C843B61C88557B7C2FB61 /* SnapToParent.swift in Sources */,
 				AD8C8AE3580BA7833E5FA300 /* Constraints.swift in Sources */,
 				AD8C8D39A7ACDCB6A46C6FC9 /* Helpers.swift in Sources */,
 				AD8C890CB4B2F5E0B92A98FB /* JustifyViews.swift in Sources */,

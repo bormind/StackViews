@@ -5,13 +5,8 @@
 
 import Foundation
 
+typealias GeneralLayoutAnchor = NSLayoutAnchor<AnyObject>
 
-internal enum SnapOption {
-    case start
-    case end
-    case center
-
-}
 
 func constraintDimension(_ orientation: Orientation)
                 -> (UIView, CGFloat)
@@ -43,26 +38,26 @@ func constraintChain(_ orientation: Orientation)
 
     return { (view, toView, space) in
         switch orientation {
-        case .horizontal: return view.leadingAnchor.constraint(equalTo: toView.trailingAnchor, constant: space)
+        case .horizontal: return view.leftAnchor.constraint(equalTo: toView.rightAnchor, constant: space)
         case .vertical: return view.topAnchor.constraint(equalTo: toView.bottomAnchor, constant: space)
         }
     }
 
 }
 
-func constraintSnap(_ orientation: Orientation, _ toView: UIView)
-                -> (UIView, SnapOption, CGFloat)
+func constraintSnap(_ toView: UIView)
+                -> (ViewSnappingOption)
                 -> NSLayoutConstraint {
 
-    return { view, snapOption, constant in
+    return { snapOption in
 
-        switch (orientation, snapOption) {
-        case (.vertical, .start): return view.topAnchor.constraint(equalTo: toView.topAnchor, constant: constant)
-        case (.horizontal, .start): return view.leftAnchor.constraint(equalTo: toView.leftAnchor, constant: constant)
-        case (.vertical, .end): return view.bottomAnchor.constraint(equalTo: toView.bottomAnchor, constant: constant)
-        case (.horizontal, .end): return view.rightAnchor.constraint(equalTo: toView.rightAnchor, constant: constant)
-        case (.horizontal, .center): return view.centerXAnchor.constraint(equalTo: toView.centerXAnchor, constant: constant)
-        case (.vertical, .center): return view.centerYAnchor.constraint(equalTo: toView.centerYAnchor, constant: constant)
+        switch snapOption.anchor {
+        case .top: return snapOption.view.topAnchor.constraint(equalTo: toView.topAnchor, constant: snapOption.constant)
+        case .left: return snapOption.view.leftAnchor.constraint(equalTo: toView.leftAnchor, constant: snapOption.constant)
+        case .bottom: return snapOption.view.bottomAnchor.constraint(equalTo: toView.bottomAnchor, constant: snapOption.constant)
+        case .right: return snapOption.view.rightAnchor.constraint(equalTo: toView.rightAnchor, constant: snapOption.constant)
+        case .centerX: return snapOption.view.centerXAnchor.constraint(equalTo: toView.centerXAnchor, constant: snapOption.constant)
+        case .centerY: return snapOption.view.centerYAnchor.constraint(equalTo: toView.centerYAnchor, constant: snapOption.constant)
         }
     }
 }

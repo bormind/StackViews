@@ -44,10 +44,14 @@ fileprivate func arrangeSpacerViews(_ orientation: Orientation, _ container: UIV
     return { views in
 
         let setViewDimension = constraintDimension(orientation.flip())
-        let snapToContainer = constraintSnap(orientation.flip(), container)
+        let getAnchor = anchorForLocation(orientation.flip())
+
+        let snapToContainer = constraintSnap(container)
 
         let constraints = views.map { setViewDimension($0, 10) }
-                        + views.map { snapToContainer($0, .center, 0) }
+                        + views.map {
+                             snapToContainer(ViewSnappingOption(view: $0, anchor: getAnchor(.center), constant: 0))
+                        }
 
         guard views.count > 1 else {
             return constraints
@@ -60,23 +64,59 @@ fileprivate func arrangeSpacerViews(_ orientation: Orientation, _ container: UIV
     }
 }
 
-fileprivate func snappingOptionsForJustifiedViews(_ justify: Justify, _ views: [UIView])
-            -> [(UIView, SnapOption)] {
-
-    let snapStart: (UIView, SnapOption) = (views[0], .start)
-    let snapEnd: (UIView, SnapOption) = (views[views.count - 1], .end)
-    let snapCenter: (UIView, SnapOption) = (views[0], .center)
-
+fileprivate func locationsToJustify(_ justify: Justify, _ viewCount: Int) -> [Location] {
     switch justify {
-    case .start: return [snapStart]
-    case .end: return [snapEnd]
+    case .start: return [.start]
+    case .end: return [.end]
     case .center:
-        if views.count == 1 {
-            return [snapCenter]
+        if viewCount < 2 {
+            return [.center]
         } else {
-            return [snapStart, snapEnd]
+            return [.start, .end]
         }
-    case .fill, .spaceBetween: return [snapStart, snapEnd]
+    case .fill: return [.start, .end]
+    case .spaceBetween: return [.start, .end]
+    }
+}
+
+fileprivate func snappingOptionsForJustifiedViews(_ orientation: Orientation, _ justify: Justify, _ insets: Insets, _ views: [UIView])
+            -> [ViewSnappingOption] {
+
+    guard !views.isEmpty else {
+        return []
+    }
+
+    let getAnchor = anchorForLocation(orientation)
+    let getInset = insetForAnchor(insets)
+
+    let getViewForLocation = { (location: Location)->UIView in
+        switch location {
+        case .start: return views[0]
+        case .center: return views[0]
+        case .end: return views[views.count - 1]
+        }
+    }
+
+    return locationsToJustify(justify,  views.count)
+        .map { (getViewForLocation($0), getAnchor($0)) }
+        .map { ViewSnappingOption(view: $0.0, anchor: $0.1, constant: getInset($0.1)) }
+}
+
+fileprivate func chainViews(_ orientation: Orientation, _ views: [UIView], _ spacing: CGFloat) -> [NSLayoutConstraint] {
+    let chain = constraintChain(orientation)
+
+    return (0..<views.count - 1).map { chain(views[$0 + 1], views[$0], spacing) }
+}
+
+fileprivate func snapToContainer(_ orientation: Orientation, _ container: UIView, _ justify: Justify, _ insets: Insets)
+                    -> ([UIView])
+                    -> [NSLayoutConstraint] {
+
+    let doSnapToContainer = constraintSnap(container)
+
+    return { views in
+        return snappingOptionsForJustifiedViews(orientation, justify, insets, views)
+                .map(doSnapToContainer)
     }
 }
 
@@ -93,15 +133,12 @@ func justifyViews(_ orientation: Orientation, _ container: UIView, _ insets: Ins
         let (allViews, spacerViews) = createSpacerViewsIfNeeded(justify, views)
         meetTheParent(container, allViews)
 
-        let snapToContainer = constraintSnap(orientation, container)
-        let insetForSnapOption = insetForSnap(orientation, insets)
-        let chain = constraintChain(orientation)
+        let doArrangeSpacerViews = arrangeSpacerViews(orientation, container)
+        let doSnapToContainer = snapToContainer(orientation, container, justify, insets)
 
-        let constraints = arrangeSpacerViews(orientation, container)(spacerViews)
-            + snappingOptionsForJustifiedViews(justify, allViews)
-                            .map { (view, snappingOption) in (view, snappingOption, insetForSnapOption(snappingOption)) }
-                            .map (snapToContainer)
-            + (0..<views.count - 1).map { chain(views[$0 + 1], views[$0], spacing) }
+        let constraints = doArrangeSpacerViews(spacerViews)
+                            + doSnapToContainer(allViews)
+                            + chainViews(orientation, allViews, spacing)
 
         return (constraints, spacerViews)
     }

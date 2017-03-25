@@ -70,7 +70,10 @@ class InteractiveStackViewController: UIViewController {
 
     func render(options: StackOptions) {
 
-        self.stackingResult?.clearConstraints()
+        if let stackingResult = stackingResult {
+            resetStackViews(stackingResult: stackingResult)
+        }
+
         self.stackingResult = stackWithOptions(parentView: self.view, children: self.children, options: options)
 
     }
