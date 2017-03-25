@@ -23,16 +23,18 @@ func alignViews(_ orientation: Orientation, _ container: UIView, _ insets: Inset
 
         assert(individualAlignments == nil || individualAlignments!.count == views.count, propertyCountMismatchMessage)
 
+        meetTheParent(container, views)
+
         let snapOrientation = orientation.flip()
         let snapToContainer = constraintSnap(snapOrientation, container)
 
-        let insetForSnap = insetForSnap(snapOrientation, insets)
+        let snapInset = insetForSnap(snapOrientation, insets)
 
         let viewAlignment = { individualAlignments?[$0] ?? alignment }
 
         let snappingOptionsForIndex = { index in
             snapOptionsForAlignment(viewAlignment(index))
-                .map { (views[index], $0, insetForSnap($0)) } // (View, SnapOption, CGFloat)
+                .map { (views[index], $0, snapInset($0)) } // (View, SnapOption, CGFloat)
         }
 
         return (0..<views.count)

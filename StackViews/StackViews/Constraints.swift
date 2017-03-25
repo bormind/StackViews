@@ -5,17 +5,22 @@
 
 import Foundation
 
+
+internal enum SnapOption {
+    case start
+    case end
+    case center
+
+}
+
 func constraintDimension(_ orientation: Orientation)
-                -> (CGFloat)
-                -> (UIView)
+                -> (UIView, CGFloat)
                 -> NSLayoutConstraint {
 
-    return { constant in
-        return { view in
-            switch orientation {
-            case .horizontal: return view.widthAnchor.constraint(equalToConstant: constant)
-            case .vertical: return view.heightAnchor.constraint(equalToConstant: constant)
-            }
+    return { (view, constant) in
+        switch orientation {
+        case .horizontal: return view.widthAnchor.constraint(equalToConstant: constant)
+        case .vertical: return view.heightAnchor.constraint(equalToConstant: constant)
         }
     }
 }
@@ -32,19 +37,17 @@ func constraintRelativeDimension(_ orientation: Orientation, _ toView: UIView)
     }
 }
 
-func constraintChain(_ orientation: Orientation, _ view: UIView, _ constant: CGFloat)
-                -> (CGFloat)
-                -> (UIView, UIView)
+func constraintChain(_ orientation: Orientation)
+                -> (UIView, UIView, CGFloat)
                 -> NSLayoutConstraint {
 
-    return { constant in
-        return { (view, toView) in
-            switch orientation {
-            case .horizontal: return view.leadingAnchor.constraint(equalTo: toView.trailingAnchor, constant: constant)
-            case .vertical: return view.topAnchor.constraint(equalTo: toView.bottomAnchor, constant: constant)
-            }
+    return { (view, toView, space) in
+        switch orientation {
+        case .horizontal: return view.leadingAnchor.constraint(equalTo: toView.trailingAnchor, constant: space)
+        case .vertical: return view.topAnchor.constraint(equalTo: toView.bottomAnchor, constant: space)
         }
     }
+
 }
 
 func constraintSnap(_ orientation: Orientation, _ toView: UIView)
