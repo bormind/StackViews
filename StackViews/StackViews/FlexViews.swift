@@ -5,47 +5,51 @@
 
 import Foundation
 
-internal func flexViews(orientation: Orientation,
-                        views:[UIView],
-                        flexValues:[CGFloat?],
-                        dimensions: [CGFloat?]? = nil,
-                        priority: UILayoutPriority? = nil) -> ([NSLayoutConstraint], [String]) {
+fileprivate func findKeyIndexForDimensions(_ indexes: [Int], _ dimensions: [CGFloat?]) -> Int {
 
-    assert(views.count == flexValues.count)
-    assert(dimensions == nil || views.count == dimensions!.count)
+    let indexesForSetDimensions = indexes.filter { dimensions[$0] != nil }
 
-    let flexIndexes = (0..<flexValues.count).filter { flexValues[$0] != nil }
-
-    if flexIndexes.count < 2 {
-        return ([], [])
+    guard indexesForSetDimensions.count > 0 else {
+        return 0
     }
 
-    let keyIndex: Int
-    var errors: [String] = []
-    if let dimensions = dimensions {
-        let indexesForSetDimensions = flexIndexes.filter { dimensions[$0] != nil }
+    if indexesForSetDimensions.count > 1 {
+        print("StackViews: View Indexes \(indexesForSetDimensions) have explicit size and proportional values set at the same time\nOnly one view in the proportional view chain can have both values present at the same time.")
+    }
 
-        if indexesForSetDimensions.count > 0 {
-            keyIndex = indexesForSetDimensions[0]
-            if indexesForSetDimensions.count > 1 {
-                errors.append("View Indexes \(indexesForSetDimensions) have explicit size and proportional values set at the same time\nOnly one view in the proportional view chain can have both values present at the same time.")
-            }
+    return indexesForSetDimensions[0]
+}
+
+func flexViews(_ orientation: Orientation)
+        -> ([UIView], [CGFloat?], [CGFloat?]?)
+        -> [NSLayoutConstraint] {
+
+    return { (views, flexValues, dimensions) in
+
+        assert(views.count == flexValues.count)
+        assert(dimensions == nil || views.count == dimensions!.count)
+
+        let flexIndexes = (0 ..< flexValues.count).filter {
+            flexValues[$0] != nil
         }
-        else {
+
+        if flexIndexes.count < 2 {
+            return []
+        }
+
+        let keyIndex: Int
+        if let dimensions = dimensions {
+            keyIndex = findKeyIndexForDimensions(flexIndexes, dimensions)
+        } else {
             keyIndex = 0
         }
+
+        let keyFlexVal = flexValues[keyIndex]!
+
+        let setRelativeDimension = constraintRelativeDimension(orientation, views[keyIndex])
+
+        return flexIndexes
+                .filter {  $0 != keyIndex  }
+                .map { setRelativeDimension(views[$0], flexValues[$0]! / keyFlexVal) }
     }
-    else {
-        keyIndex = 0
-    }
-
-    let keyFlexVal = flexValues[keyIndex]!
-
-    let constraints =  flexIndexes
-            .filter { $0 != keyIndex }
-            .map {
-                return views[$0].sameDimension(orientation, views[keyIndex], multiplier: flexValues[$0]! / keyFlexVal)
-            }
-
-    return (constraints, errors)
 }
