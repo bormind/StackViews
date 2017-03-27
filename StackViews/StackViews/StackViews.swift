@@ -90,21 +90,28 @@ public func resetStackViews(stackingResult: StackingResult) {
 }
 
 //Helper function do deal with controllers guides
-public func embedView(_ view: UIView,
-                      inViewController: UIViewController,
-                      insets: Insets = Insets.zero) {
+public func constrainToGuides(_ view: UIView,
+                              inViewController: UIViewController,
+                              insets: Insets = Insets.zero,
+                              activate: Bool = true) -> [NSLayoutConstraint] {
 
     inViewController.view.addSubview(view)
 
     view.translatesAutoresizingMaskIntoConstraints = false
 
     //Constraint container to edges
-    NSLayoutConstraint.activate([
-            view.topAnchor.constraint(equalTo: inViewController.topLayoutGuide.bottomAnchor, constant: insets.top),
-            view.leftAnchor.constraint(equalTo: inViewController.view.leftAnchor, constant: insets.left),
-            view.bottomAnchor.constraint(equalTo: inViewController.bottomLayoutGuide.topAnchor, constant: -insets.bottom),
-            view.rightAnchor.constraint(equalTo: inViewController.view.rightAnchor, constant: -insets.right)
-    ])
+    let constraints = [
+        view.topAnchor.constraint(equalTo: inViewController.topLayoutGuide.bottomAnchor, constant: insets.top),
+        view.leftAnchor.constraint(equalTo: inViewController.view.leftAnchor, constant: insets.left),
+        view.bottomAnchor.constraint(equalTo: inViewController.bottomLayoutGuide.topAnchor, constant: -insets.bottom),
+        view.rightAnchor.constraint(equalTo: inViewController.view.rightAnchor, constant: -insets.right)
+    ]
+
+    if activate {
+        NSLayoutConstraint.activate(constraints)
+    }
+
+    return constraints
 }
 
 
@@ -151,7 +158,6 @@ public func stackViews(
     meetTheParent(container, views)
 
     var constraints:[NSLayoutConstraint] = []
-    var spacerViews: [UIView] = []
 
     let setDimensions = { (orientation: Orientation, dimensions: [CGFloat?]) -> [NSLayoutConstraint] in
         let setDimension = constraintDimension(orientation)

@@ -28,11 +28,13 @@ class MenuViewController: UIViewController, UITableViewDelegate, UITableViewData
 
     init() {
         super.init(nibName: nil, bundle: nil)
-        
+
+        self.title = "StackViews Examples"
+
         self.view.backgroundColor = UIColor.white
         self.automaticallyAdjustsScrollViewInsets = false
         
-        embedView(tableView, inViewController: self)
+        _ = constrainToGuides(tableView, inViewController: self)
 
         tableView.register(MenuTableCell.self, forCellReuseIdentifier: tableCellId)
 
@@ -47,8 +49,8 @@ class MenuViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
 
     fileprivate let examples: [MenuItem] = [
-            MenuItem("Interactive Example", InteractiveExampleViewController.self),
-            MenuItem("UIStackView Docs Example", DocsExampleViewController.self)
+            MenuItem("UIStackView Docs Form Example", FormExampleViewController.self),
+            MenuItem("Interactive Example", InteractiveExampleViewController.self)
     ]
 
     override func didReceiveMemoryWarning() {

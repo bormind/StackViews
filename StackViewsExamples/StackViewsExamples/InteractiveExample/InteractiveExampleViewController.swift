@@ -23,7 +23,7 @@ class InteractiveExampleViewController: UIViewController {
 
         self.view.backgroundColor = UIColor.white
 
-        title = "Interactive StackViews"
+        self.title = "Interactive Example"
 
         optionsViewController.optionsChanged = self.onOptionsChanged
 
