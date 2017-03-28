@@ -152,10 +152,13 @@ public func insetView(_ view: UIView,
             (Gap between the container view edges and it's children) Default = 0
             - spacing: spacing between neighboring views along the stacking axis. Default = 0
             - views: array of view that should be arranged (stacked) inside the container view
-            - withs:
+            - withs: array of width values corresponding to each view in views array. nil value indicates that width constraint will not be set
+            If width array is provided it's leght chold be equal to the views array length
+            - proportionalWidths: can be used to specify relative width value for views. If bot absolute width value and relative value provided 
+            than the firs view with both values specified will be used as a 'key' view and all other proportionalWidths will be set in relation to this view. 
+            For example if we have width: [nil, 50, nil]
 
-    - Returns: A beautiful, brand-new bicycle, custom built
-      just for you.
+    - Returns: StackingResult structure containing container view, array of generated constraints, array of generated spacer views.
 */
 public func stackViews(
         container: UIView? = nil,
