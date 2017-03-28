@@ -11,10 +11,15 @@ It is similar to the IOS UIStackView but it works with any view and includes con
 
 Bottom line - one function call includes all the aspects of constraining children inside the StackView
 
-## Example
+## Sample application
+In addition to the StackViews library workspace includes StackViewExamples reference application.
+This applications uses StackView library to implement Example View Controller from Apple's [Auto Layout Cookbook](https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/LayoutUsingStackViews.html)
+In addition Sample Application includes interactive view controller where different parameters of the stackViews function can be changed interactively and changes observed in real time
+<img src="./images/form_view.png" height="300px">
+<img src="./images/interactive_view.png" height="300px">
 
-Fragment that generates this form header:<br>
-<img src="./images/form_header.png" height="90px">
+## Code Sample
+This is annotated code sample that generates this form header:<br>
 <img src="./images/form_header_long.png" height="90px">
 ```Swift
     let image = UIImageView(image: UIImage(named: "PersonProfile"))
