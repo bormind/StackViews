@@ -50,18 +50,22 @@ fileprivate func stackWithOptions(
 
 }
 
-class InteractiveStackViewController: UIViewController {
+class InteractiveRenderingViewController: UIViewController {
 
     let viewTitles = ["View1", "View2", "View3"]
     let children:[UIView]
 
     var stackingResult: StackingResult?
 
+    var stackPanelView: UIView!
+
     init() {
         self.children = viewTitles.map { createChildView(title: $0) }
         super.init(nibName: nil, bundle: nil)
 
-        self.view.layer.borderWidth = 2
+        self.view.backgroundColor = UIColor.barColor
+
+        stackPanelView = prepareStackPanel()
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -74,7 +78,34 @@ class InteractiveStackViewController: UIViewController {
             resetStackViews(stackingResult: stackingResult)
         }
 
-        self.stackingResult = stackWithOptions(parentView: self.view, children: self.children, options: options)
+        self.stackingResult = stackWithOptions(parentView: stackPanelView, children: self.children, options: options)
+    }
 
+    private func prepareStackPanel() -> UIView {
+        let panel = UIView()
+        panel.backgroundColor = UIColor(hex: 0x80dfff)
+        panel.layer.borderWidth = 1
+        panel.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(panel)
+
+        let centerConstraints = [
+            panel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            panel.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
+        ]
+
+        let inset: CGFloat = 5
+
+        let edgeConstraints = [
+            panel.topAnchor.constraint(equalTo: self.view.topAnchor, constant: inset),
+            panel.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: inset),
+            panel.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -inset),
+            panel.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: -inset)
+        ]
+
+        edgeConstraints.forEach { $0.priority = 500 }
+
+        NSLayoutConstraint.activate(centerConstraints + edgeConstraints)
+
+        return panel
     }
 }

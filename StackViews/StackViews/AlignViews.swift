@@ -19,6 +19,8 @@ func alignViews(_ orientation: Orientation, _ container: UIView, _ insets: Inset
                 -> (Alignment, [UIView], [Alignment?]?)
                 -> [NSLayoutConstraint] {
 
+    let constraintToAnchor = constraintToAnchors(container, insets, anchorConstraintPriority)
+
     return { (alignment, views, individualAlignments) in
 
         assert(individualAlignments == nil || individualAlignments!.count == views.count, propertyCountMismatchMessage)
@@ -27,21 +29,19 @@ func alignViews(_ orientation: Orientation, _ container: UIView, _ insets: Inset
 
         let snapOrientation = orientation.flip()
         let getAnchor = anchorForLocation(snapOrientation)
-        let getInset = insetForAnchor(insets)
-        let snapToParent = constraintSnap(container)
 
         let viewAlignment = { individualAlignments?[$0] ?? alignment }
 
-        let getSnappingOptions = { (view: UIView, alignment:Alignment) -> [ViewSnappingOption] in
+        let pairViewsAndAnchors = { (view: UIView, alignment:Alignment) -> [(UIView, Anchor)] in
             return locationsForAlignment(alignment)
                     .map(getAnchor)
-                    .map { ViewSnappingOption(view: view, anchor: $0, constant: getInset($0)) }
+                    .map { (view, anchor: $0) }
         }
 
         return (0..<views.count)
                     .map { (views[$0], viewAlignment($0)) }
-                    .flatMap(getSnappingOptions)
-                    .map(snapToParent)
+                    .flatMap(pairViewsAndAnchors)
+                    .map(constraintToAnchor)
 
     }
 }

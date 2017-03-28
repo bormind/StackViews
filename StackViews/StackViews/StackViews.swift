@@ -114,6 +114,29 @@ public func constrainToGuides(_ view: UIView,
     return constraints
 }
 
+public func insetView(_ view: UIView,
+                      container: UIView,
+                      insets: Insets,
+                      priority: Float? = nil,
+                      activate: Bool = true) -> [NSLayoutConstraint] {
+
+    meetTheParent(container, [view])
+    let constraintInset = constraintToEdges(container, insets, priority)
+
+
+    let anchors:[EdgeAnchor] = [.top, .left, .bottom, .right]
+
+    let constraints = anchors
+            .map { (view, anchor: $0) }
+            .map(constraintInset)
+
+    if activate {
+        NSLayoutConstraint.activate(constraints)
+    }
+
+    return constraints
+}
+
 
 /**
     Generates all necessary constraints that arrange provided views in the single stack horizontally or vertically

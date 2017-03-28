@@ -11,15 +11,7 @@ enum Location {
     case start, center, end
 }
 
-enum Anchor {
-    case top, left, bottom, right, centerX, centerY
-}
 
-struct ViewSnappingOption {
-    let view: UIView
-    let anchor: Anchor
-    let constant: CGFloat
-}
 
 func anchorForLocation(_ orientation: Orientation)
                 -> (Location)
@@ -27,29 +19,20 @@ func anchorForLocation(_ orientation: Orientation)
 
     return { location in
         switch (orientation, location) {
-        case (.vertical, .start): return .top
-        case (.horizontal, .start): return .left
-        case (.vertical, .center): return .centerY
-        case (.horizontal, .center): return .centerX
-        case (.vertical, .end): return .bottom
-        case (.horizontal, .end): return .right
+        case (.vertical, .start): return Anchor(.top)
+        case (.horizontal, .start): return Anchor(.left)
+        case (.vertical, .center): return Anchor(.centerY)
+        case (.horizontal, .center): return Anchor(.centerX)
+        case (.vertical, .end): return Anchor(.bottom)
+        case (.horizontal, .end): return Anchor(.right)
         }
     }
 }
 
-func insetForAnchor(_ insets: Insets)
-                -> (Anchor)
-        -> CGFloat {
-
-    return { edge in
-        switch edge {
-        case .top: return insets.top
-        case .left: return insets.left
-        case .bottom: return -insets.bottom
-        case .right: return -insets.right
-        case .centerX: return 0
-        case .centerY: return 0
-        }
+func getCenterAnchor(_ orientation: Orientation) -> CenterAnchor {
+    switch orientation.flip() {
+    case .horizontal: return .centerX
+    case .vertical: return .centerY
     }
 }
 

@@ -24,12 +24,13 @@ fileprivate let widthOptions: [CGFloat?] = [nil, 80, 150]
 fileprivate let heightOptions: [CGFloat?] = [nil, 25, 80]
 fileprivate let proportionalOptions: [CGFloat?] = [nil, 1, 2, 3, 5]
 fileprivate let spacingOptions: [CGFloat] = [0, 10, 20]
+fileprivate let insetsOptions: [CGFloat] = [0, 10, 20]
 
 fileprivate let initialOptions = StackOptions(
         orientation: .horizontal,
         justify: .center,
         align: .center,
-        insets: Insets.zero,
+        insets: Insets(horizontal: 10, vertical: 10),
         spacing: 10,
         widths: [80, 80, 80],
         proportionalWidths: [nil, nil, nil],
@@ -121,7 +122,7 @@ fileprivate func areEqual<T: Equatable>(_ lhs: T?, _ rhs: T?) -> Bool {
     }
 }
 
-class OptionsViewController: UIViewController {
+class OptionsPanelViewController: UIViewController {
 
     var options: StackOptions
 
@@ -211,7 +212,7 @@ class OptionsViewController: UIViewController {
     }
 
     func onInsets(_ title: String) {
-        let componentItems:[CGFloat] = spacingOptions
+        let componentItems:[CGFloat] = insetsOptions
         let items = [[CGFloat]](repeating: componentItems, count:4)
         let stringItems = [[String]](repeating: componentItems.map {"\($0)"}, count:4)
 
@@ -234,7 +235,7 @@ class OptionsViewController: UIViewController {
     }
 
     func onSpacing(_ title: String) {
-        let items: [CGFloat] = [0, 20]
+        let items: [CGFloat] = spacingOptions
         let currentIndex = items.index(where: { $0 == self.options.spacing }) ?? 0
         let titles = items.map { "\(Int($0))" }
 

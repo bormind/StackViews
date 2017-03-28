@@ -7,6 +7,43 @@ import Foundation
 
 typealias GeneralLayoutAnchor = NSLayoutAnchor<AnyObject>
 
+let anchorConstraintPriority: Float = 900 //We do this to make insets and centering priority weaker that sizing priority
+
+enum EdgeAnchor {
+    case top, left, bottom, right
+}
+
+enum CenterAnchor {
+    case centerX, centerY
+}
+
+enum Anchor {
+    case edgeAnchor(EdgeAnchor)
+    case centerAnchor(CenterAnchor)
+
+    init(_ edgeAnchor: EdgeAnchor) {
+        self = .edgeAnchor(edgeAnchor)
+    }
+
+    init(_ centerAnchor: CenterAnchor) {
+        self = .centerAnchor(centerAnchor)
+    }
+}
+
+fileprivate func insetsForAnchor(_ insets: Insets)
+                -> (EdgeAnchor)
+                -> CGFloat {
+
+    return { edge in
+        switch edge {
+        case .top: return insets.top
+        case .left: return insets.left
+        case .bottom: return -insets.bottom
+        case .right: return -insets.right
+        }
+    }
+}
+
 
 func constraintDimension(_ orientation: Orientation)
                 -> (UIView, CGFloat)
@@ -45,19 +82,64 @@ func constraintChain(_ orientation: Orientation)
 
 }
 
-func constraintSnap(_ toView: UIView)
-                -> (ViewSnappingOption)
+func constraintToEdges(_ container: UIView, _ insets: Insets, _ priority: Float?)
+                -> (UIView, EdgeAnchor)
                 -> NSLayoutConstraint {
 
-    return { snapOption in
+    let insetForAnchor = insetsForAnchor(insets)
 
-        switch snapOption.anchor {
-        case .top: return snapOption.view.topAnchor.constraint(equalTo: toView.topAnchor, constant: snapOption.constant)
-        case .left: return snapOption.view.leftAnchor.constraint(equalTo: toView.leftAnchor, constant: snapOption.constant)
-        case .bottom: return snapOption.view.bottomAnchor.constraint(equalTo: toView.bottomAnchor, constant: snapOption.constant)
-        case .right: return snapOption.view.rightAnchor.constraint(equalTo: toView.rightAnchor, constant: snapOption.constant)
-        case .centerX: return snapOption.view.centerXAnchor.constraint(equalTo: toView.centerXAnchor, constant: snapOption.constant)
-        case .centerY: return snapOption.view.centerYAnchor.constraint(equalTo: toView.centerYAnchor, constant: snapOption.constant)
+    return { view, anchor in
+
+        let constant = insetForAnchor(anchor)
+
+        let constraint: NSLayoutConstraint
+
+        switch anchor {
+        case .top: constraint = view.topAnchor.constraint(equalTo: container.topAnchor, constant: constant)
+        case .left: constraint = view.leftAnchor.constraint(equalTo: container.leftAnchor, constant: constant)
+        case .bottom: constraint = view.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: constant)
+        case .right: constraint = view.rightAnchor.constraint(equalTo: container.rightAnchor, constant: constant)
+        }
+
+        if let priority = priority {
+            constraint.priority = priority
+        }
+
+        return constraint
+    }
+}
+
+func constraintToCenters(_ container: UIView, _ priority: Float?)
+            -> (UIView, CenterAnchor, CGFloat)
+            -> NSLayoutConstraint {
+
+    return { view, anchor, constant in
+
+        let constraint: NSLayoutConstraint
+        switch anchor {
+        case .centerX: constraint = view.centerXAnchor.constraint(equalTo: container.centerXAnchor, constant: constant)
+        case .centerY: constraint = view.centerYAnchor.constraint(equalTo: container.centerYAnchor, constant: constant)
+        }
+
+        if let priority = priority {
+            constraint.priority = priority
+        }
+
+        return constraint
+    }
+}
+
+func constraintToAnchors(_ container: UIView, _ insets: Insets, _ priority: Float?)
+            -> (UIView, Anchor)
+            -> NSLayoutConstraint {
+
+    let constraintInset = constraintToEdges(container, insets, priority)
+    let doConstraintCenter = constraintToCenters(container, priority)
+
+    return { view, anchor in
+        switch anchor {
+        case .edgeAnchor(let edge): return constraintInset(view, edge)
+        case .centerAnchor(let center): return doConstraintCenter(view, center, 0)
         }
     }
 }

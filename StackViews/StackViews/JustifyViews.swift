@@ -44,13 +44,12 @@ fileprivate func arrangeSpacerViews(_ orientation: Orientation, _ container: UIV
     return { views in
 
         let setViewDimension = constraintDimension(orientation.flip())
-        let getAnchor = anchorForLocation(orientation.flip())
-
-        let snapToContainer = constraintSnap(container)
+        let constraintToContainer = constraintToCenters(container, anchorConstraintPriority)
+        let anchor = getCenterAnchor(orientation)
 
         let constraints = views.map { setViewDimension($0, 10) }
                         + views.map {
-                             snapToContainer(ViewSnappingOption(view: $0, anchor: getAnchor(.center), constant: 0))
+                             constraintToContainer($0, anchor, 0)
                         }
 
         guard views.count > 1 else {
@@ -80,14 +79,14 @@ fileprivate func locationsToJustify(_ justify: Justify, _ viewCount: Int) -> [Lo
 }
 
 fileprivate func snappingOptionsForJustifiedViews(_ orientation: Orientation, _ justify: Justify, _ insets: Insets, _ views: [UIView])
-            -> [ViewSnappingOption] {
+            -> [(UIView, Anchor)] {
 
     guard !views.isEmpty else {
         return []
     }
 
     let getAnchor = anchorForLocation(orientation)
-    let getInset = insetForAnchor(insets)
+
 
     let getViewForLocation = { (location: Location)->UIView in
         switch location {
@@ -99,7 +98,6 @@ fileprivate func snappingOptionsForJustifiedViews(_ orientation: Orientation, _ 
 
     return locationsToJustify(justify,  views.count)
         .map { (getViewForLocation($0), getAnchor($0)) }
-        .map { ViewSnappingOption(view: $0.0, anchor: $0.1, constant: getInset($0.1)) }
 }
 
 fileprivate func chainViews(_ orientation: Orientation, _ views: [UIView], _ spacing: CGFloat) -> [NSLayoutConstraint] {
@@ -112,11 +110,11 @@ fileprivate func snapToContainer(_ orientation: Orientation, _ container: UIView
                     -> ([UIView])
                     -> [NSLayoutConstraint] {
 
-    let doSnapToContainer = constraintSnap(container)
+    let constraintToAnchor = constraintToAnchors(container, insets, anchorConstraintPriority)
 
     return { views in
         return snappingOptionsForJustifiedViews(orientation, justify, insets, views)
-                .map(doSnapToContainer)
+                .map(constraintToAnchor)
     }
 }
 

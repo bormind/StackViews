@@ -14,12 +14,14 @@ Bottom line - one function call includes all the aspects of constraining childre
 ## Sample application
 In addition to the StackViews library workspace includes StackViewExamples reference application.
 This applications uses StackView library to implement Example View Controller from Apple's [Auto Layout Cookbook](https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/LayoutUsingStackViews.html)
-In addition Sample Application includes interactive view controller where different parameters of the stackViews function can be changed interactively and changes observed in real time
+In addition Sample Application includes interactive view controller where different parameters of the stackViews function can be changed interactively and changes observed in the real time
+
 <img src="./images/form_view.png" height="300px">
 <img src="./images/interactive_view.png" height="300px">
+<img src="./images/interactive_view_2.png" height="300px">
 
-## Code Sample
-This is annotated code sample that generates this form header:<br>
+## Usage Example
+This is annotated code example that generates this form header ([check out source file for more details](./StackViewsExamples/StackViewsExamples/FormExapmle/FormExampleHeaderViewController.swift)):<br>
 <img src="./images/form_header_long.png" height="90px">
 ```Swift
     let image = UIImageView(image: UIImage(named: "PersonProfile"))

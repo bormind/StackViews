@@ -11,13 +11,13 @@ import StackViews
 
 class InteractiveExampleViewController: UIViewController {
 
-    let stackViewController: InteractiveStackViewController
-    let optionsViewController: OptionsViewController
+    let stackViewController: InteractiveRenderingViewController
+    let optionsViewController: OptionsPanelViewController
 
     init() {
 
-        self.stackViewController = InteractiveStackViewController()
-        self.optionsViewController = OptionsViewController(viewTitles: stackViewController.viewTitles)
+        self.stackViewController = InteractiveRenderingViewController()
+        self.optionsViewController = OptionsPanelViewController(viewTitles: stackViewController.viewTitles)
 
         super.init(nibName: nil, bundle: nil)
 
@@ -54,6 +54,5 @@ class InteractiveExampleViewController: UIViewController {
     public func onOptionsChanged() {
         stackViewController.render(options: self.optionsViewController.options)
     }
-
 
 }
