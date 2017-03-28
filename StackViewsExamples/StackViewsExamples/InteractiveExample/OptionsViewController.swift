@@ -20,15 +20,20 @@ struct StackOptions {
     var individualAlignments: [Alignment?]
 }
 
+fileprivate let widthOptions: [CGFloat?] = [nil, 80, 150]
+fileprivate let heightOptions: [CGFloat?] = [nil, 25, 80]
+fileprivate let proportionalOptions: [CGFloat?] = [nil, 1, 2, 3, 5]
+fileprivate let spacingOptions: [CGFloat] = [0, 10, 20]
+
 fileprivate let initialOptions = StackOptions(
-        orientation: .vertical,
+        orientation: .horizontal,
         justify: .center,
         align: .center,
         insets: Insets.zero,
-        spacing: 0,
-        widths: [100, 100, 100],
+        spacing: 10,
+        widths: [80, 80, 80],
         proportionalWidths: [nil, nil, nil],
-        heights: [100, 100, 100],
+        heights: [80, 80, 80],
         proportionalHeights: [nil, nil, nil],
         individualAlignments: [nil, nil, nil])
 
@@ -103,9 +108,7 @@ fileprivate let supportedAlignments: [Alignment] = [
         Alignment.end
 ]
 
-fileprivate let widthOptions: [CGFloat?] = [nil, 100, 200]
-fileprivate let heightOptions: [CGFloat?] = [nil, 25, 100]
-fileprivate let proportionalOptions: [CGFloat?] = [nil, 1, 2, 3, 5]
+
 
 fileprivate typealias ControlRecord = (String, UIButton, (String)->())
 
@@ -208,7 +211,7 @@ class OptionsViewController: UIViewController {
     }
 
     func onInsets(_ title: String) {
-        let componentItems:[CGFloat] = [0, 20]
+        let componentItems:[CGFloat] = spacingOptions
         let items = [[CGFloat]](repeating: componentItems, count:4)
         let stringItems = [[String]](repeating: componentItems.map {"\($0)"}, count:4)
 

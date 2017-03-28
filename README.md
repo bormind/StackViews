@@ -24,28 +24,36 @@ Fragment that generates this form header:<br>
 
     //Stack Fields vertically
     let fieldsStackView = stackViews(
-            orientation: .vertical,
-            justify: .fill,
-            align: .fill,
-            spacing: 10,
+            orientation: .vertical, // vertical stack of 3 rows
+            justify: .fill, // because heights of all 3 rows set explicitly (no nil height row) this will make
+                            // fieldsStackView height determined by the sum of rows heights and spaces between them
+
+            align: .fill,  // fill all available space across stack axis (horizontally)
+            spacing: 10, //vertical spacing between rows
             views: [
                     applyLabel("First Name", ofWidth: 110, toField: firstName),
                     applyLabel("Middle Name", ofWidth: 110, toField: middleName),
                     applyLabel("Last Name", ofWidth: 110, toField: lastName)
             ],
-            heights: [25, 25, 25]).container
+            heights: [25, 25, 25]) // height of each row
+        .container
 
-    //Stack image and fields container horizontally
-    _ = stackViews(
-            container: self.view,
-            orientation: .horizontal,
-            justify: .fill,
-            align: .fill,
-            insets: Insets(horizontal: 5, vertical: 5),
-            spacing: 10,
-            views: [image, fieldsStackView])
-
-    //set image view to be square
+    //set image view to be a square
     image.widthAnchor.constraint(equalTo: image.heightAnchor, multiplier: 1).isActive = true
+
+    //Stack imageView and fieldsStackView horizontally
+    //We do not set any explicit widths or heights because height of the header
+    //is determined by the height of the fieldsStackView and vertical insets.
+    //Height of the image is determined by the height header. Width of the image is determined by image being square
+    //And width of the fieldsStackView view we want to be stretchable to fill all the available horizontal space
+    _ = stackViews(
+            container: self.view, // use ViewController's view as a stack container
+            orientation: .horizontal, //stack image and fieldsStackView horizontally
+            justify: .fill, // fill all available space along stack axis (horizontally
+            align: .fill, // fill all available space across stack axis (vertically)
+            insets: Insets(horizontal: 5, vertical: 5), // set space between container view boundaries and
+                                                        // and it's children
+            spacing: 10, // space between image and fieldsStackView
+            views: [image, fieldsStackView])
 
 ```

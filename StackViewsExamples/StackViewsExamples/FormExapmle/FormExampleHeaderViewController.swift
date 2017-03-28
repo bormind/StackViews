@@ -65,11 +65,6 @@ class FormExampleHeaderViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-//    private func nameRowsSection() -> UIView {
-//        let section = UIView()
-//
-//
-//    }
 
     //Groups fieldView with label as one row
     private func applyLabel(_ label: String, ofWidth: CGFloat, toField: UITextField) -> UIView {
