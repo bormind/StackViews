@@ -13,8 +13,8 @@ Bottom line - one function call includes all the aspects of constraining childre
 
 ## Sample application
 In addition to the StackViews library workspace includes StackViewExamples reference application.
-This applications uses StackView library to implement Example View Controller from Apple's [Auto Layout Cookbook](https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/LayoutUsingStackViews.html)
-In addition Sample Application includes interactive view controller where different parameters of the stackViews function can be changed interactively and changes observed in the real time
+Reference application uses StackView library to replicate Example View Controller from Apple's [Auto Layout Cookbook](https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/LayoutUsingStackViews.html).<br>
+In addition Sample Application includes interactive view controller where different parameters of the stackViews function can be changed interactively and changes observed in the real time.
 
 <img src="./images/form_view.png" height="300px"><img src="./images/interactive_view.png" height="300px"><img src="./images/interactive_view_2.png" height="300px">
 
