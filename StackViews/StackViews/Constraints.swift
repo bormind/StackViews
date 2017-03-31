@@ -4,10 +4,13 @@
 //
 
 import Foundation
+import UIKit
 
 typealias GeneralLayoutAnchor = NSLayoutAnchor<AnyObject>
 
-let anchorConstraintPriority: Float = 900 //We do this to make insets and centering priority weaker that sizing priority
+//We do this to make insets and centering priority weaker that sizing priority
+let anchorConstraintPriority: Float = 900
+let spacingConstraintPriority: Float = 900
 
 enum EdgeAnchor {
     case top, left, bottom, right
@@ -69,15 +72,21 @@ func constraintRelativeDimension(_ orientation: Orientation, _ toView: UIView)
     }
 }
 
-func constraintChain(_ orientation: Orientation)
+func constraintChain(_ orientation: Orientation, _ priority: Float?)
                 -> (UIView, UIView, CGFloat)
                 -> NSLayoutConstraint {
 
     return { (view, toView, space) in
+
+        let constraint: NSLayoutConstraint
         switch orientation {
-        case .horizontal: return view.leftAnchor.constraint(equalTo: toView.rightAnchor, constant: space)
-        case .vertical: return view.topAnchor.constraint(equalTo: toView.bottomAnchor, constant: space)
+        case .horizontal: constraint = view.leftAnchor.constraint(equalTo: toView.rightAnchor, constant: space)
+        case .vertical: constraint = view.topAnchor.constraint(equalTo: toView.bottomAnchor, constant: space)
         }
+
+        priority.map { constraint.priority = $0 }
+
+        return constraint
     }
 
 }
@@ -101,9 +110,7 @@ func constraintToEdges(_ container: UIView, _ insets: Insets, _ priority: Float?
         case .right: constraint = view.rightAnchor.constraint(equalTo: container.rightAnchor, constant: constant)
         }
 
-        if let priority = priority {
-            constraint.priority = priority
-        }
+        priority.map { constraint.priority = $0 }
 
         return constraint
     }
@@ -121,9 +128,7 @@ func constraintToCenters(_ container: UIView, _ priority: Float?)
         case .centerY: constraint = view.centerYAnchor.constraint(equalTo: container.centerYAnchor, constant: constant)
         }
 
-        if let priority = priority {
-            constraint.priority = priority
-        }
+        priority.map { constraint.priority = $0 }
 
         return constraint
     }

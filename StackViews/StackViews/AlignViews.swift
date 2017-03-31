@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import UIKit
 
 fileprivate func locationsForAlignment(_ alignment: Alignment) -> [Location] {
     switch alignment {
@@ -16,7 +17,7 @@ fileprivate func locationsForAlignment(_ alignment: Alignment) -> [Location] {
 
 
 func alignViews(_ orientation: Orientation, _ container: UIView, _ insets: Insets)
-                -> (Alignment, [UIView], [Alignment?]?)
+                -> (Alignment?, [UIView], [Alignment?]?)
                 -> [NSLayoutConstraint] {
 
     let constraintToAnchor = constraintToAnchors(container, insets, anchorConstraintPriority)
@@ -24,8 +25,6 @@ func alignViews(_ orientation: Orientation, _ container: UIView, _ insets: Inset
     return { (alignment, views, individualAlignments) in
 
         assert(individualAlignments == nil || individualAlignments!.count == views.count, propertyCountMismatchMessage)
-
-        meetTheParent(container, views)
 
         let snapOrientation = orientation.flip()
         let getAnchor = anchorForLocation(snapOrientation)
@@ -38,8 +37,10 @@ func alignViews(_ orientation: Orientation, _ container: UIView, _ insets: Inset
                     .map { (view, anchor: $0) }
         }
 
+
         return (0..<views.count)
-                    .map { (views[$0], viewAlignment($0)) }
+                    .filter { viewAlignment($0) != nil }
+                    .map { (views[$0], viewAlignment($0)!) }
                     .flatMap(pairViewsAndAnchors)
                     .map(constraintToAnchor)
 

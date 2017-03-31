@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import UIKit
 
 public enum Orientation {
     case horizontal
@@ -146,25 +146,35 @@ public func insetView(_ view: UIView,
             If view is not provided a new view will be created and returned as a part of the StackingResult structure
             - orientation: defines the stacking axes as horizontal or vertical.
             - justify: describes the stacking option along the stacking axis.
+            supported options { .fill .start .end .spaceBetween .center }
+            If justify parameter is set to nil no justification will be applied
             - align: describes the stacking option across the stacking axes for all views.
+            supported options { .fill .start .center .end }
             Can be overwritten for specific views by the individualAlignments parameter.
+            If align set to nil and no individualAlignments provided - no views will be aligned
             - insets: specify insets applied to the edges of the container view.
             (Gap between the container view edges and it's children) Default = 0
             - spacing: spacing between neighboring views along the stacking axis. Default = 0
             - views: array of view that should be arranged (stacked) inside the container view
-            - withs: array of width values corresponding to each view in views array. nil value indicates that width constraint will not be set
-            If width array is provided it's leght chold be equal to the views array length
+            - widths: array of width values corresponding to each view in views array. nil value indicates that width constraint will not be set
+            If width array is provided it's length should be equal to the views array length
             - proportionalWidths: can be used to specify relative width value for views. If bot absolute width value and relative value provided 
             than the firs view with both values specified will be used as a 'key' view and all other proportionalWidths will be set in relation to this view. 
-            For example if we have width: [nil, 50, nil]
+            For example if we have 3 views with width: [nil, 50, nil] and proportionalWidths: [1,2,3] then resulting constraint width of the views will be: [25, 50, 75]
+            - heights: array of heights values corresponding to each view in views array. nil value indicates that height constraint will not be set
+            If heights array is provided it's length should be equal to the views array length
+            - proportionalHeights: can be used to specify relative height value for views. If bot absolute height value and relative value provided 
+            than the firs view with both values specified will be used as a 'key' view and all other proportionalHeights will be set in relation to this view.
+            For example if we have 3 views with height: [nil, 50, nil] and proportionalHeights: [1,2,3] then resulting constraint height of the views will be: [25, 50, 75]
+            - individualAlignments: Alignment for individual views.
 
     - Returns: StackingResult structure containing container view, array of generated constraints, array of generated spacer views.
 */
 public func stackViews(
         container: UIView? = nil,
         orientation: Orientation,
-        justify: Justify,
-        align: Alignment,
+        justify: Justify?,
+        align: Alignment?,
         insets: Insets = Insets.zero,
         spacing: CGFloat = 0,
         views: [UIView],
@@ -183,37 +193,20 @@ public func stackViews(
 
     meetTheParent(container, views)
 
-    var constraints:[NSLayoutConstraint] = []
-
-    let setDimensions = { (orientation: Orientation, dimensions: [CGFloat?]) -> [NSLayoutConstraint] in
-        let setDimension = constraintDimension(orientation)
-        return (0..<views.count)
-                .filter { dimensions[$0] != nil }
-                .map { setDimension(views[$0], dimensions[$0]!) }
-    }
-
     let doAlign = alignViews(orientation, container, insets)
-    let doJustify = justifyViews(orientation, container, insets)
+    let doJustify = justifyViews(orientation, container, insets, spacing, views)
 
-    if let widths = widths {
-        constraints +=  setDimensions(.horizontal, widths)
-    }
+    var constraints: [NSLayoutConstraint] = []
 
-    if let heights = heights {
-        constraints +=  setDimensions(.vertical, heights)
-    }
-
-    if let proportionalWidths = proportionalWidths {
-        constraints += flexViews(.horizontal)(views, proportionalWidths, widths)
-    }
-
-    if let proportionalHeights = proportionalHeights {
-        constraints += flexViews(.vertical)(views, proportionalHeights, heights)
-    }
-
+    //Boris: Compiler has a problem if we would try to concatenate all results on the fly
+    //This way - appending one by one - it compiles much faster
+    constraints += widths.map(constraintDimensions(.horizontal, views)) ?? []
+    constraints += heights.map(constraintDimensions(.vertical, views)) ?? []
+    constraints += proportionalWidths.map(flexViews(.horizontal, views, widths)) ?? []
+    constraints += proportionalHeights.map(flexViews(.vertical, views, heights)) ?? []
     constraints += doAlign(align, views, individualAlignments)
 
-    let (justifyConstraints, spacers) = doJustify(justify, views, spacing)
+    let (justifyConstraints, spacers) = justify.map(doJustify) ?? ([], [])
     constraints += justifyConstraints
 
     if activateConstrains && !constraints.isEmpty {

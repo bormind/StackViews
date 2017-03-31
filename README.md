@@ -64,3 +64,53 @@ This is annotated code example that generates this form header ([check out sourc
             views: [image, fieldsStackView])
 
 ```
+## API 
+
+Api consists of ***stackViews*** function and few small convenience functions:
+```Swift
+public func stackViews(
+        container: UIView? = nil,
+        orientation: Orientation,
+        justify: Justify?,
+        align: Alignment?,
+        insets: Insets = Insets.zero,
+        spacing: CGFloat = 0,
+        views: [UIView],
+        widths: [CGFloat?]? = nil,
+        proportionalWidths: [CGFloat?]? = nil,
+        heights: [CGFloat?]? = nil,
+        proportionalHeights: [CGFloat?]? = nil,
+        individualAlignments: [Alignment?]? = nil,
+        activateConstrains: Bool = true) -> StackingResult
+```
+- *container:* Container view that acts as a stack panel.
+If view is not provided a new view will be created and returned as a part of the StackingResult structure
+- *orientation:* defines the stacking axes as horizontal or vertical.
+- *justify:* describes the stacking option along the stacking axis.
+supported options _{ .fill .start .end .spaceBetween .center }_
+If justify parameter is set to nil no justification will be applied
+- *align:* describes the stacking option across the stacking axes for all views.
+supported options _{ .fill .start .center .end }_
+Can be overwritten for specific views by the individualAlignments parameter.
+If align set to nil and no individualAlignments provided - no views will be aligned
+- *insets:* specify insets applied to the edges of the container view.
+(Gap between the container view edges and it's children) Default = 0
+- *spacing:* spacing between neighboring views along the stacking axis. Default = 0
+- *views:* array of view that should be arranged (stacked) inside the container view
+- *widths:* array of width values corresponding to each view in views array. nil value indicates that width constraint will not be set
+If width array is provided it's length should be equal to the views array length
+- *proportionalWidths:* can be used to specify relative width value for views. If bot absolute width value and relative value provided 
+than the firs view with both values specified will be used as a 'key' view and all other proportionalWidths will be set in relation to this view. 
+For example if we have 3 views with width: [nil, 50, nil] and proportionalWidths: [1,2,3] then resulting constraint width of the views will be: [25, 50, 75]
+- *heights:* array of heights values corresponding to each view in views array. nil value indicates that height constraint will not be set
+If heights array is provided it's length should be equal to the views array length
+- *proportionalHeights:* can be used to specify relative height value for views. If bot absolute height value and relative value provided 
+than the firs view with both values specified will be used as a 'key' view and all other proportionalHeights will be set in relation to this view.
+For example if we have 3 views with height: [nil, 50, nil] and proportionalHeights: [1,2,3] then resulting constraint height of the views will be: [25, 50, 75]
+- *individualAlignments:* Alignment for individual views.
+
+## License
+[MIT](./LICENSE)
+
+
+   

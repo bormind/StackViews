@@ -20,11 +20,11 @@ fileprivate func findKeyIndexForDimensions(_ indexes: [Int], _ dimensions: [CGFl
     return indexesForSetDimensions[0]
 }
 
-func flexViews(_ orientation: Orientation)
-        -> ([UIView], [CGFloat?], [CGFloat?]?)
+func flexViews(_ orientation: Orientation, _ views: [UIView], _ dimensions:[CGFloat?]?)
+        -> ([CGFloat?])
         -> [NSLayoutConstraint] {
 
-    return { (views, flexValues, dimensions) in
+    return { flexValues in
 
         assert(views.count == flexValues.count)
         assert(dimensions == nil || views.count == dimensions!.count)

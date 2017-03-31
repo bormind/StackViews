@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import UIKit
 
 internal let propertyCountMismatchMessage = "Child view properties should be provided for each view in the array, nil can be used to indicate use of container wide defaults"
 
@@ -54,3 +55,26 @@ func meetTheParent(_ container: UIView, _ views: [UIView]) {
         $0.translatesAutoresizingMaskIntoConstraints = false
     }
 }
+
+
+
+func constraintDimensions(_ orientation: Orientation, _ views: [UIView])
+                -> ([CGFloat?])
+                -> [NSLayoutConstraint] {
+
+    return { dimensions in
+
+        assert(views.count == dimensions.count, propertyCountMismatchMessage)
+
+        let setDimension = constraintDimension(orientation)
+        return (0 ..< views.count)
+                .filter {
+                    dimensions[$0] != nil
+                }
+                .map {
+                    setDimension(views[$0], dimensions[$0]!)
+                }
+
+    }
+}
+

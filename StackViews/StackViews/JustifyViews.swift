@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import UIKit
 
 fileprivate func createSpacerViewsIfNeeded(_ justify: Justify, _ views: [UIView])
                 -> ([UIView], [UIView]) {
@@ -101,7 +102,7 @@ fileprivate func snappingOptionsForJustifiedViews(_ orientation: Orientation, _ 
 }
 
 fileprivate func chainViews(_ orientation: Orientation, _ views: [UIView], _ spacing: CGFloat) -> [NSLayoutConstraint] {
-    let chain = constraintChain(orientation)
+    let chain = constraintChain(orientation, spacingConstraintPriority)
 
     return (0..<views.count - 1).map { chain(views[$0 + 1], views[$0], spacing) }
 }
@@ -118,18 +119,23 @@ fileprivate func snapToContainer(_ orientation: Orientation, _ container: UIView
     }
 }
 
-func justifyViews(_ orientation: Orientation, _ container: UIView, _ insets: Insets)
-        -> (Justify, [UIView], CGFloat)
+func justifyViews(_ orientation: Orientation,
+                  _ container: UIView,
+                  _ insets: Insets,
+                  _ spacing: CGFloat,
+                  _ views: [UIView])
+
+        -> (Justify)
         -> ([NSLayoutConstraint], [UIView]) {
 
-    return { (justify, views, spacing) in
+    return { justify in
 
         guard !views.isEmpty else {
             return ([], [])
         }
 
         let (allViews, spacerViews) = createSpacerViewsIfNeeded(justify, views)
-        meetTheParent(container, allViews)
+        meetTheParent(container, spacerViews)
 
         let doArrangeSpacerViews = arrangeSpacerViews(orientation, container)
         let doSnapToContainer = snapToContainer(orientation, container, justify, insets)
