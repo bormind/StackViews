@@ -72,20 +72,23 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         let panelView = createPanelView(container: self.view)
 
         //Title bar
-        let _ = panelView.stackViews(orientation: .horizontal,
+        let _ = stackViews(
+                    container: panelView,
+                    orientation: .horizontal,
                     justify: .fill,
                     align: .start,
-                    insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5),
+                    insets: Insets(horizontal: 5, vertical: 5),
                     views: [leftSpacer, titleLabel, doneButton],
                     widths: [50, nil, 50],
                     heights: [25, 25, 25])
 
         //picker
-        let _ = panelView.stackViews(
+        let _ = stackViews(
+                    container: panelView,
                     orientation: .horizontal,
                     justify: .fill,
                     align: .fill,
-                    insets: UIEdgeInsets(top: 40, left: 0, bottom: 0, right: 0),
+                    insets: Insets(top: 40),
                     views: [picker])
     }
 
@@ -98,7 +101,8 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             return label
         }
 
-        _ = picker.stackViews(
+        _ = stackViews(
+                container: picker,
                 orientation: .horizontal,
                 justify: .fill,
                 align: .start,
@@ -111,11 +115,12 @@ class PickerViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         let panel = UIView()
         panel.backgroundColor = UIColor.barColor
 
-        let _ = container.stackViews(
+        let _ = stackViews(
+                    container: container,
                     orientation: .horizontal,
                     justify: .fill,
                     align: .center,
-                    insets: UIEdgeInsets(horizontal: 20),
+                    insets: Insets(horizontal: 20),
                     views: [panel],
                     heights: [250])
 

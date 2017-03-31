@@ -11,27 +11,28 @@ import StackViews
 
 class InteractiveExampleViewController: UIViewController {
 
-    let stackViewController: InteractiveStackViewController
-    let optionsViewController: OptionsViewController
+    let stackViewController: InteractiveRenderingViewController
+    let optionsViewController: OptionsPanelViewController
 
     init() {
 
-        self.stackViewController = InteractiveStackViewController()
-        self.optionsViewController = OptionsViewController(viewTitles: stackViewController.viewTitles)
+        self.stackViewController = InteractiveRenderingViewController()
+        self.optionsViewController = OptionsPanelViewController(viewTitles: stackViewController.viewTitles)
 
         super.init(nibName: nil, bundle: nil)
 
         self.view.backgroundColor = UIColor.white
 
-        title = "Interactive StackViews"
+        self.title = "Interactive Example"
 
         optionsViewController.optionsChanged = self.onOptionsChanged
 
-        let _ = self.view.stackViews(
+        let _ = stackViews(
+                    container: self.view,
                     orientation: .vertical,
                     justify: .fill,
                     align: .fill,
-                    insets: UIEdgeInsets(top: 64, left: 0, bottom: 0, right: 0),
+                    insets: Insets(top: 64),
                     views: [optionsViewController.view, stackViewController.view],
                     heights: [255, nil])
 
@@ -53,6 +54,5 @@ class InteractiveExampleViewController: UIViewController {
     public func onOptionsChanged() {
         stackViewController.render(options: self.optionsViewController.options)
     }
-
 
 }

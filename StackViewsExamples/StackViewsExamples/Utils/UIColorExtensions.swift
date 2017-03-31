@@ -20,6 +20,7 @@ extension UIColor {
     }
 
     static let barColor = UIColor(red: 247, green: 247, blue: 247)
+    static let steelBlue = UIColor(red: 70, green: 130, blue: 180)
 }
 
 

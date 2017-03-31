@@ -7,39 +7,7 @@
 //
 
 import Foundation
-
-
-fileprivate extension UIEdgeInsets {
-    var leading: CGFloat {
-        return UIApplication.shared.userInterfaceLayoutDirection == UIUserInterfaceLayoutDirection.leftToRight
-            ? self.left
-            : self.right
-    }
-
-    var trailing: CGFloat {
-        return UIApplication.shared.userInterfaceLayoutDirection == UIUserInterfaceLayoutDirection.leftToRight
-                ? self.right
-                : self.left
-    }
-
-    func start(_ orientation: Orientation) -> CGFloat {
-        switch orientation {
-        case .horizontal:
-            return self.leading
-        case .vertical:
-            return self.top
-        }
-    }
-
-    func end(_ orientation: Orientation) -> CGFloat {
-        switch orientation {
-        case .horizontal:
-            return self.trailing
-        case .vertical:
-            return self.bottom
-        }
-    }
-}
+import UIKit
 
 public enum Orientation {
     case horizontal
@@ -69,389 +37,184 @@ public enum Justify {
 }
 
 public struct StackingResult {
+    public let container: UIView
     public var constraints: [NSLayoutConstraint]
-    public var generatedViews: [UIView]
-    public var errors: [String]
+    public var spacerViews: [UIView]
+}
 
-    init(constraints: [NSLayoutConstraint] = [], generatedViews: [UIView] = [], errors: [String] = []) {
-        self.constraints = constraints
-        self.generatedViews = generatedViews
-        self.errors = errors
+public struct Insets {
+    public let top: CGFloat
+    public let left: CGFloat
+    public let bottom: CGFloat
+    public let right: CGFloat
+
+    public static var zero: Insets {
+        return Insets()
+    }
+
+    public init(top: CGFloat = 0, left: CGFloat = 0, bottom: CGFloat = 0, right: CGFloat = 0) {
+        self.top = top
+        self.left = left
+        self.bottom = bottom
+        self.right = right
+    }
+
+    public init(horizontal: CGFloat, vertical: CGFloat) {
+        self.init(top: vertical, left: horizontal, bottom: vertical, right: horizontal)
+    }
+
+    public init(horizontal: CGFloat) {
+        self.init(top: 0, left: horizontal, bottom: 0, right: horizontal)
+    }
+
+    public init(vertical: CGFloat) {
+       self.init(top: vertical, left: 0, bottom: vertical, right: 0)
+    }
+
+    public var leading: CGFloat {
+        return UIApplication.shared.userInterfaceLayoutDirection == UIUserInterfaceLayoutDirection.leftToRight
+                ? self.left
+                : self.right
+    }
+
+    public var trailing: CGFloat {
+        return UIApplication.shared.userInterfaceLayoutDirection == UIUserInterfaceLayoutDirection.leftToRight
+                ? self.right
+                : self.left
     }
 }
 
-public extension StackingResult {
-    public mutating func clearConstraints() {
-        NSLayoutConstraint.deactivate(self.constraints)
-        generatedViews.forEach{ $0.removeFromSuperview() }
-        constraints = []
-        generatedViews = []
-        errors = []
-    }
+public func resetStackViews(stackingResult: StackingResult) {
+    NSLayoutConstraint.deactivate(stackingResult.constraints)
+    stackingResult.spacerViews.forEach{ $0.removeFromSuperview() }
 }
 
-infix operator  += { associativity left precedence 140 }
-func +=( lhs: inout StackingResult, rhs: StackingResult) {
-    lhs.constraints += rhs.constraints
-    lhs.generatedViews += rhs.generatedViews
-    lhs.errors += rhs.errors
+//Helper function do deal with controllers guides
+public func constrainToGuides(_ view: UIView,
+                              inViewController: UIViewController,
+                              insets: Insets = Insets.zero,
+                              activate: Bool = true) -> [NSLayoutConstraint] {
+
+    inViewController.view.addSubview(view)
+
+    view.translatesAutoresizingMaskIntoConstraints = false
+
+    //Constraint container to edges
+    let constraints = [
+        view.topAnchor.constraint(equalTo: inViewController.topLayoutGuide.bottomAnchor, constant: insets.top),
+        view.leftAnchor.constraint(equalTo: inViewController.view.leftAnchor, constant: insets.left),
+        view.bottomAnchor.constraint(equalTo: inViewController.bottomLayoutGuide.topAnchor, constant: -insets.bottom),
+        view.rightAnchor.constraint(equalTo: inViewController.view.rightAnchor, constant: -insets.right)
+    ]
+
+    if activate {
+        NSLayoutConstraint.activate(constraints)
+    }
+
+    return constraints
 }
 
+public func insetView(_ view: UIView,
+                      container: UIView,
+                      insets: Insets,
+                      priority: Float? = nil,
+                      activate: Bool = true) -> [NSLayoutConstraint] {
 
-fileprivate extension UIView {
+    meetTheParent(container, [view])
+    let constraintInset = constraintToEdges(container, insets, priority)
 
-    func chainTo(_ orientation: Orientation, _ view: UIView, _ constant: CGFloat) -> NSLayoutConstraint {
-        switch orientation {
-        case .horizontal: return self.leadingAnchor.constraint(equalTo: view.trailingAnchor, constant: constant)
-        case .vertical: return self.topAnchor.constraint(equalTo: view.bottomAnchor, constant: constant)
-        }
+
+    let anchors:[EdgeAnchor] = [.top, .left, .bottom, .right]
+
+    let constraints = anchors
+            .map { (view, anchor: $0) }
+            .map(constraintInset)
+
+    if activate {
+        NSLayoutConstraint.activate(constraints)
     }
 
-    func snapToStart(_ orientation: Orientation, _ view: UIView, _ constant: CGFloat) -> NSLayoutConstraint {
-        switch orientation {
-        case .horizontal: return self.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: constant)
-        case .vertical: return self.topAnchor.constraint(equalTo: view.topAnchor, constant: constant)
-        }
-    }
-
-    func snapToEnd(_ orientation: Orientation, _ view: UIView, _ constant: CGFloat) -> NSLayoutConstraint {
-        switch orientation {
-        case .horizontal: return self.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: constant)
-        case .vertical: return self.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: constant)
-        }
-    }
-
-    func snapToCenter(_ orientation: Orientation, _ view: UIView) -> NSLayoutConstraint {
-        switch orientation {
-        case .horizontal: return self.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        case .vertical: return self.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        }
-    }
-
-    func setDimension(_ orientation: Orientation, _ constant: CGFloat) -> NSLayoutConstraint {
-        switch orientation {
-        case .horizontal: return self.widthAnchor.constraint(equalToConstant: constant)
-        case .vertical: return self.heightAnchor.constraint(equalToConstant: constant)
-        }
-    }
-
-    func sameDimension(_ orientation: Orientation, _ view: UIView, multiplier: CGFloat = 1) -> NSLayoutConstraint {
-        switch orientation {
-        case .horizontal: return self.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: multiplier)
-        case .vertical: return self.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: multiplier)
-        }
-    }
-
-    func sameFirstBaseLine(_ view: UIView) -> NSLayoutConstraint {
-        return self.firstBaselineAnchor.constraint(equalTo: view.firstBaselineAnchor)
-    }
-
-    func sameLastBaseLine(_ view: UIView) -> NSLayoutConstraint {
-        return self.lastBaselineAnchor.constraint(equalTo: view.lastBaselineAnchor)
-    }
+    return constraints
 }
 
 
-fileprivate let propertyCountMismatchMessage = "Child view properties should be provided for each view in the array, nil can be used to indicate use of container wide defaults"
+/**
+    Generates all necessary constraints that arrange provided views in the single stack horizontally or vertically
 
-fileprivate enum SnappingOptions {
-    case noSnap
-    case snapToStart
-    case snapToEnd
-    case snapToBoth
+    - Parameters:
+            - container: Container view that acts as a stack panel.
+            If view is not provided a new view will be created and returned as a part of the StackingResult structure
+            - orientation: defines the stacking axes as horizontal or vertical.
+            - justify: describes the stacking option along the stacking axis.
+            supported options { .fill .start .end .spaceBetween .center }
+            If justify parameter is set to nil no justification will be applied
+            - align: describes the stacking option across the stacking axes for all views.
+            supported options { .fill .start .center .end }
+            Can be overwritten for specific views by the individualAlignments parameter.
+            If align set to nil and no individualAlignments provided - no views will be aligned
+            - insets: specify insets applied to the edges of the container view.
+            (Gap between the container view edges and it's children) Default = 0
+            - spacing: spacing between neighboring views along the stacking axis. Default = 0
+            - views: array of view that should be arranged (stacked) inside the container view
+            - widths: array of width values corresponding to each view in views array. nil value indicates that width constraint will not be set
+            If width array is provided it's length should be equal to the views array length
+            - proportionalWidths: can be used to specify relative width value for views. If bot absolute width value and relative value provided 
+            than the firs view with both values specified will be used as a 'key' view and all other proportionalWidths will be set in relation to this view. 
+            For example if we have 3 views with width: [nil, 50, nil] and proportionalWidths: [1,2,3] then resulting constraint width of the views will be: [25, 50, 75]
+            - heights: array of heights values corresponding to each view in views array. nil value indicates that height constraint will not be set
+            If heights array is provided it's length should be equal to the views array length
+            - proportionalHeights: can be used to specify relative height value for views. If bot absolute height value and relative value provided 
+            than the firs view with both values specified will be used as a 'key' view and all other proportionalHeights will be set in relation to this view.
+            For example if we have 3 views with height: [nil, 50, nil] and proportionalHeights: [1,2,3] then resulting constraint height of the views will be: [25, 50, 75]
+            - individualAlignments: Alignment for individual views.
+
+    - Returns: StackingResult structure containing container view, array of generated constraints, array of generated spacer views.
+*/
+public func stackViews(
+        container: UIView? = nil,
+        orientation: Orientation,
+        justify: Justify?,
+        align: Alignment?,
+        insets: Insets = Insets.zero,
+        spacing: CGFloat = 0,
+        views: [UIView],
+        widths: [CGFloat?]? = nil,
+        proportionalWidths: [CGFloat?]? = nil,
+        heights: [CGFloat?]? = nil,
+        proportionalHeights: [CGFloat?]? = nil,
+        individualAlignments: [Alignment?]? = nil,
+        activateConstrains: Bool = true) -> StackingResult {
+
+    let container = container ?? createView()
+
+    guard !views.isEmpty else {
+        return StackingResult(container: container, constraints: [], spacerViews: [])
+    }
+
+    meetTheParent(container, views)
+
+    let doAlign = alignViews(orientation, container, insets)
+    let doJustify = justifyViews(orientation, container, insets, spacing, views)
+
+    var constraints: [NSLayoutConstraint] = []
+
+    //Boris: Compiler has a problem if we would try to concatenate all results on the fly
+    //This way - appending one by one - it compiles much faster
+    constraints += widths.map(constraintDimensions(.horizontal, views)) ?? []
+    constraints += heights.map(constraintDimensions(.vertical, views)) ?? []
+    constraints += proportionalWidths.map(flexViews(.horizontal, views, widths)) ?? []
+    constraints += proportionalHeights.map(flexViews(.vertical, views, heights)) ?? []
+    constraints += doAlign(align, views, individualAlignments)
+
+    let (justifyConstraints, spacers) = justify.map(doJustify) ?? ([], [])
+    constraints += justifyConstraints
+
+    if activateConstrains && !constraints.isEmpty {
+        NSLayoutConstraint.activate(constraints)
+    }
+
+    return StackingResult(container: container, constraints: constraints, spacerViews: spacers)
 }
 
 
-
-//private helper functions
-extension UIView {
-    fileprivate func meetTheParent(_ view: UIView) {
-        assert(view.superview == nil || view.superview! == self, "Superview view mismatch!")
-
-        if view.superview == nil {
-            self.addSubview(view)
-        }
-
-        view.translatesAutoresizingMaskIntoConstraints = false
-    }
-
-    fileprivate func alignSpacerViews(_ orientation: Orientation, _ views: [UIView]) -> [NSLayoutConstraint] {
-        return views.map { $0.setDimension(orientation.flip(), 10) }
-             + views.map { $0.snapToCenter(orientation.flip(), self) }
-
-    }
-
-    fileprivate func arrangeSpacerViews(_ orientation: Orientation, _ views: [UIView]) -> [NSLayoutConstraint] {
-
-        let flexValues = [CGFloat](repeating: 1, count: views.count)
-        let constraints =
-            flexViews(orientation: orientation, views: views, flexValues: flexValues).constraints
-            + alignSpacerViews(orientation, views)
-
-        return constraints
-    }
-
-    fileprivate func chainViews(
-            _ snappingOptions: SnappingOptions,
-            _ orientation: Orientation,
-            _ insets: UIEdgeInsets,
-            _ spacing: CGFloat,
-            _ views: [UIView]) -> [NSLayoutConstraint] {
-
-        if views.isEmpty {
-            return []
-        }
-
-        var constraints:[NSLayoutConstraint] = []
-
-        constraints += (0..<views.count - 1).reduce([]) { acc, i in
-            return acc + [views[i + 1].chainTo(orientation, views[i], spacing)]
-        }
-
-        switch snappingOptions {
-        case .snapToStart:
-            constraints.append(views[0].snapToStart(orientation, self, insets.start(orientation)))
-        case .snapToEnd:
-            constraints.append(views[views.count - 1].snapToEnd(orientation, self, -insets.end(orientation)))
-        case .snapToBoth:
-            constraints.append(views[0].snapToStart(orientation, self, insets.start(orientation)))
-            constraints.append(views[views.count - 1].snapToEnd(orientation, self, -insets.end(orientation)))
-        case .noSnap:
-            break
-        }
-
-        return constraints
-    }
-
-
-    fileprivate func alignView(_ orientation: Orientation,
-                                _ alignment: Alignment,
-                                _ view: UIView,
-                                _ insets: UIEdgeInsets) -> [NSLayoutConstraint] {
-
-        let flippedOrientation = orientation.flip()
-        switch alignment {
-        case .start:
-            return [view.snapToStart(flippedOrientation, self, insets.start(flippedOrientation))]
-        case .center:
-            return [view.snapToCenter(flippedOrientation, self)]
-        case .end:
-            return [view.snapToEnd(flippedOrientation, self, -insets.end(flippedOrientation))]
-        case .fill:
-            return [
-                    view.snapToStart(flippedOrientation, self, insets.start(flippedOrientation)),
-                    view.snapToEnd(flippedOrientation, self, -insets.end(flippedOrientation))
-            ]
-        }
-    }
-
-
-
-    fileprivate func addViewsAround(_ views: [UIView], _ orientation: Orientation) -> ([UIView], [UIView]) {
-        let outerViews = [UIView(), UIView()]
-        outerViews.forEach(meetTheParent)
-
-
-        let allViews = [outerViews[0]] + views + [outerViews[1]]
-
-        return (allViews, outerViews)
-    }
-
-    fileprivate func addViewsBetween(_ views: [UIView], _ orientation: Orientation) -> ([UIView], [UIView]) {
-        if views.count < 2 {
-            return (views, [])
-        }
-
-        let spacerViews = (0..<views.count - 1).map { _ in UIView() }
-        spacerViews.forEach(meetTheParent)
-
-        let allViews = (0..<spacerViews.count).reduce([views[0]]) { acc, i in
-            return acc + [spacerViews[i], views[i + 1]]
-        }
-
-        return (allViews, spacerViews)
-    }
-
-}
-
-//public functions
-public func flexViews(orientation: Orientation,
-                      views:[UIView],
-                      flexValues:[CGFloat?],
-                      dimensions: [CGFloat?]? = nil,
-                      priority: UILayoutPriority? = nil) -> StackingResult {
-
-    assert(views.count == flexValues.count)
-    assert(dimensions == nil || views.count == dimensions!.count)
-
-    let flexIndexes = (0..<flexValues.count).filter { flexValues[$0] != nil }
-
-    if flexIndexes.count < 2 {
-        return StackingResult()
-    }
-
-    let keyIndex: Int
-    var errors: [String] = []
-    if let dimensions = dimensions {
-        let indexesForSetDimensions = flexIndexes.filter { dimensions[$0] != nil }
-
-        if indexesForSetDimensions.count > 0 {
-            keyIndex = indexesForSetDimensions[0]
-            if indexesForSetDimensions.count > 1 {
-                errors.append("View Indexes \(indexesForSetDimensions) have explicit size and proportional values set at the same time\nOnly one view in the proportional view chain can have both values present at the same time.")
-            }
-        }
-        else {
-            keyIndex = 0
-        }
-    }
-    else {
-        keyIndex = 0
-    }
-
-    let keyFlexVal = flexValues[keyIndex]!
-
-    let constraints =  (0..<views.count)
-            .filter { $0 != keyIndex }
-            .map {
-                return views[$0].sameDimension(orientation, views[keyIndex], multiplier: flexValues[$0]! / keyFlexVal)
-            }
-
-    return StackingResult(constraints: constraints, errors: errors)
-}
-
-
-public extension UIView {
-
-    public func justifyViews(_ justify: Justify,
-                             orientation: Orientation,
-                             insets: UIEdgeInsets = UIEdgeInsets.zero,
-                             spacing: CGFloat = 0,
-                             views: [UIView]) -> StackingResult {
-
-        views.forEach(self.meetTheParent)
-
-        var constraints: [NSLayoutConstraint] = []
-        var generatedViews: [UIView] = []
-
-        switch justify {
-        case .start:
-            constraints += chainViews(.snapToStart, orientation, insets, spacing, views)
-        case .fill:
-            constraints += chainViews(.snapToBoth, orientation, insets, spacing, views)
-        case .end:
-            constraints += chainViews(.snapToEnd, orientation, insets, spacing, views)
-        case .center:
-            if views.count == 1 {
-                constraints.append(views[0].snapToCenter(orientation, self))
-            }
-            else {
-                let (allViews, spacers) = addViewsAround(views, orientation)
-                generatedViews += spacers
-                constraints += arrangeSpacerViews(orientation, spacers)
-                constraints += chainViews(.snapToBoth, orientation, insets, spacing, allViews)
-            }
-        case .spaceBetween:
-            if views.count > 1 {
-                let (allViews, spacers) = addViewsBetween(views, orientation)
-                generatedViews += spacers
-                constraints += arrangeSpacerViews(orientation, spacers)
-                constraints += chainViews(.snapToBoth, orientation, insets, spacing, allViews)
-            }
-        }
-
-        return StackingResult(constraints: constraints, generatedViews: generatedViews)
-    }
-
-    public func alignViews(
-            _ align: Alignment,
-            orientation: Orientation,
-            insets: UIEdgeInsets = UIEdgeInsets.zero,
-            views: [UIView],
-            individualAlignments: [Alignment?]? = nil) -> StackingResult {
-
-        assert(individualAlignments == nil || individualAlignments!.count == views.count, propertyCountMismatchMessage)
-
-        views.forEach(self.meetTheParent)
-
-        let constraints = (0..<views.count).reduce([]) { acc, i in
-            return acc + alignView(orientation, individualAlignments?[i] ?? align, views[i], insets)
-        }
-
-        return StackingResult(constraints: constraints)
-    }
-
-    public func stackViews(
-            orientation: Orientation,
-            justify: Justify,
-            align: Alignment,
-            insets: UIEdgeInsets = UIEdgeInsets.zero,
-            spacing: CGFloat = 0,
-            views: [UIView],
-            widths: [CGFloat?]? = nil,
-            proportionalWidths: [CGFloat?]? = nil,
-            heights: [CGFloat?]? = nil,
-            proportionalHeights: [CGFloat?]? = nil,
-            individualAlignments: [Alignment?]? = nil,
-            activateConstrains: Bool = true) -> StackingResult {
-
-        var result = StackingResult()
-
-        if views.count == 0 {
-            return result
-        }
-
-        views.forEach(self.meetTheParent)
-
-        if let widths = widths {
-            result.constraints +=  (0..<views.count)
-                    .filter { widths[$0] != nil }
-                    .map { views[$0].widthAnchor.constraint(equalToConstant: widths[$0]!) }
-
-        }
-
-        if let heights = heights {
-            result.constraints +=  (0..<views.count)
-                    .filter { heights[$0] != nil }
-                    .map { views[$0].heightAnchor.constraint(equalToConstant: heights[$0]!) }
-        }
-
-        result += justifyViews(
-                justify, orientation:
-                orientation,
-                insets: insets,
-                spacing: spacing,
-                views: views)
-
-        if let proportionalWidths = proportionalWidths {
-            result += flexViews(
-                    orientation: .horizontal,
-                    views: views,
-                    flexValues: proportionalWidths,
-                    dimensions: widths)
-        }
-
-        if let proportionalHeights = proportionalHeights {
-            result += flexViews(
-                    orientation: .vertical,
-                    views: views,
-                    flexValues: proportionalHeights,
-                    dimensions: heights)
-        }
-
-        result += alignViews(
-                align,
-                orientation: orientation,
-                insets: insets,
-                views: views,
-                individualAlignments: individualAlignments)
-
-        if activateConstrains && !result.constraints.isEmpty {
-            NSLayoutConstraint.activate(result.constraints)
-        }
-
-        return result
-    }
-
-}
 
