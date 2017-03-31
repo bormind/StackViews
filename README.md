@@ -19,7 +19,7 @@ In addition Sample Application includes interactive view controller where differ
 <img src="./images/form_view.png" height="300px"><img src="./images/interactive_view.png" height="300px"><img src="./images/interactive_view_2.png" height="300px">
 
 ## Usage Example
-This is annotated code example that generates this form header ([check out source file for more details](./StackViewsExamples/StackViewsExamples/FormExapmle/FormExampleHeaderViewController.swift)):<br>
+Here is an annotated code example that generates this form header ([check out source file for more details](./StackViewsExamples/StackViewsExamples/FormExapmle/FormExampleHeaderViewController.swift)):<br>
 <img src="./images/form_header_long.png" height="90px">
 ```Swift
     let image = UIImageView(image: UIImage(named: "PersonProfile"))
@@ -64,7 +64,7 @@ This is annotated code example that generates this form header ([check out sourc
 ```
 ## API 
 
-Api consists of ***stackViews*** function and few small convenience functions:
+Api consists of ***stackViews*** function and few small convenience functions. All public functions are in [StackViews.swift](./StackViews/StackViews/StackViews.swift).
 ```Swift
 public func stackViews(
         container: UIView? = nil,
