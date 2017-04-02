@@ -49,7 +49,7 @@ class MenuViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
 
     fileprivate let examples: [MenuItem] = [
-            MenuItem("UIStackView Docs Form Example", FormExampleViewController.self),
+            MenuItem("Replicated Autolayout Cookbook Example", FormExampleViewController.self),
             MenuItem("Interactive Example", InteractiveExampleViewController.self)
     ]
 
